@@ -1,0 +1,10 @@
+Alimentacion
+Transporte
+Educacion
+Salud
+Entretenimiento
+Servicios
+Salario
+Ahorro
+Inversion
+Otros
