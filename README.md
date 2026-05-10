@@ -1,0 +1,1 @@
+# Gestor_Finanzas-Paradigma_Funcional
