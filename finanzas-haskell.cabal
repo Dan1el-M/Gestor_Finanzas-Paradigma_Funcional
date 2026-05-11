@@ -22,13 +22,15 @@ executable finanzas-haskell
         Models
         Utils
         FinanceManager
-        CategoryManager
         BudgetManager
         Rules
         Analysis
         Simulations
         Reports
         FileManager
+        CategoryService
+        UI.MainMenu
+        UI.CategoryMenu
 
     -- Dependencias base.
     -- base: funciones principales de Haskell.
@@ -42,3 +44,7 @@ executable finanzas-haskell
 
     -- Opciones útiles para mostrar advertencias al compilar.
     ghc-options: -Wall
+
+-- Para levantar el proyecto, ejecuta:
+--   cabal build
+--   cabal run
