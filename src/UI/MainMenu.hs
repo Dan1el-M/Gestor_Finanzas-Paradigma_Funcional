@@ -2,6 +2,7 @@ module UI.MainMenu where
 
 import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
+import UI.SimulationMenu (menuSimulacion)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
@@ -48,7 +49,7 @@ ejecutarOpcion opcion =
             menuPrincipal
 
         "5" -> do
-            putStrLn "Modulo de simulacion pendiente."
+            menuSimulacion
             menuPrincipal
 
         "6" -> do
