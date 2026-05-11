@@ -11,8 +11,9 @@ agregarRegistro registros nuevo = nuevo : registros
 filtrarPorTipo :: TipoRegistro -> [RegistroFinanciero] -> [RegistroFinanciero]
 filtrarPorTipo tipo = filter (\r -> tipoRegistro r == tipo)
 
-filtrarPorCategoria :: String -> [RegistroFinanciero] -> [RegistroFinanciero]
-filtrarPorCategoria cat = filter (\r -> categoriaRegistro r == cat)
+filtrarPorCategoria :: Int -> [RegistroFinanciero] -> [RegistroFinanciero]
+filtrarPorCategoria idCategoriaBuscada =
+    filter (\r -> idCategoriaRegistro r == idCategoriaBuscada)
 
 filtrarPorEtiqueta :: String -> [RegistroFinanciero] -> [RegistroFinanciero]
 filtrarPorEtiqueta etiqueta = filter (\r -> etiqueta `elem` etiquetasRegistro r)

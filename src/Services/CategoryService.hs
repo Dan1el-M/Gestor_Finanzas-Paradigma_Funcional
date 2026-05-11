@@ -1,3 +1,7 @@
+{-- Este archivo contiene las funciones principales que se
+utilizan en el menu de categorias, para esta misma se edita en
+caliente el documento de categorias.txt
+--} 
 module Services.CategoryService
     ( crearCategoriaService
     , buscarCategoriaPorId

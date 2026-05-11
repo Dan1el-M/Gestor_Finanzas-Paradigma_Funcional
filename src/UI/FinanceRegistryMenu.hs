@@ -3,6 +3,7 @@ module UI.FinanceRegistryMenu where
 import System.IO (hFlush, stdout)
 import Models
 import Services.FinanceRegistryService
+import UI.CategoryMenu (menuCategoria)
 import Data.Time (Day, fromGregorian)
 
 menuRegistroFinanciero :: IO ()
@@ -10,72 +11,74 @@ menuRegistroFinanciero = do
     putStrLn "===================================="
     putStrLn "  Gestion de Registros Financieros"
     putStrLn "===================================="
-    opcionesRegistroFinanciero
-
-opcionesRegistroFinanciero :: IO ()
-opcionesRegistroFinanciero = do
     putStrLn ""
     putStrLn "Seleccione una opcion:"
     putStrLn "1. Agregar nuevo registro financiero"
     putStrLn "2. Ver registros financieros"
     putStrLn "3. Editar registro financiero"
     putStrLn "4. Eliminar registro financiero"
-    putStrLn "5. Volver al menu principal"
+    putStrLn "5. Gestionar categorías"
+    putStrLn "6. Volver al menu principal"
     putStr "Opcion: "
     hFlush stdout
 
     opcion <- getLine
     ejecutarOpcion opcion
+    
 
 ejecutarOpcion :: String -> IO ()
 ejecutarOpcion opcion =
     case opcion of
         "1" -> do
             subMenuAgregarRegistroFinanciero
-            opcionesRegistroFinanciero
+            menuRegistroFinanciero
 
         "2" -> do
             registros <- cargarRegistros
             mostrarRegistros registros
-            opcionesRegistroFinanciero
+            menuRegistroFinanciero
 
         "3" -> do
             subMenuEditarRegistroFinanciero
-            opcionesRegistroFinanciero
+            menuRegistroFinanciero
 
         "4" -> do
             subMenuEliminarRegistroFinanciero
-            opcionesRegistroFinanciero
+            menuRegistroFinanciero
 
-        "5" ->
+        "5" -> do
+            menuCategoria
+            menuRegistroFinanciero
+
+        "6" ->
             putStrLn "Volviendo al menu principal..."
 
         _ -> do
             putStrLn "Opcion invalida. Intente de nuevo."
-            opcionesRegistroFinanciero
+            menuRegistroFinanciero
 
 subMenuAgregarRegistroFinanciero :: IO ()
 subMenuAgregarRegistroFinanciero = do
     putStrLn "===================================="
     putStrLn " Agregar Nuevo Registro Financiero"
     putStrLn "===================================="
-    nuevo      <- solicitarDatosRegistro
     existentes <- cargarRegistros
+    nuevo <- solicitarDatosRegistro (siguienteIdRegistro existentes)
     let actualizados = agregarRegistro existentes nuevo
     guardarRegistros actualizados
     putStrLn "Registro agregado y guardado correctamente."
 
-solicitarDatosRegistro :: IO RegistroFinanciero
-solicitarDatosRegistro = do
+solicitarDatosRegistro :: Int -> IO RegistroFinanciero
+solicitarDatosRegistro idNuevo = do
     tipo <- pedirTipo
 
     putStr "Monto: "
     hFlush stdout
     monto <- readLn :: IO Double
 
-    putStr "Categoria: "
+    putStr "ID de categoria: "
     hFlush stdout
-    cat <- getLine
+    idCat <- readLn :: IO Int
 
     fecha <- pedirFecha
 
@@ -89,13 +92,18 @@ solicitarDatosRegistro = do
     let etiquetas = splitOn ',' etiquetasRaw
 
     return $ RegistroFinanciero
-        { tipoRegistro        = tipo
+        { idRegistro          = idNuevo
+        , tipoRegistro        = tipo
         , montoRegistro       = monto
-        , categoriaRegistro   = cat
+        , idCategoriaRegistro = idCat
         , fechaRegistro       = fecha
         , descripcionRegistro = desc
         , etiquetasRegistro   = etiquetas
         }
+
+siguienteIdRegistro :: [RegistroFinanciero] -> Int
+siguienteIdRegistro [] = 1
+siguienteIdRegistro registros = maximum (map idRegistro registros) + 1
 
 pedirTipo :: IO TipoRegistro
 pedirTipo = do
@@ -144,9 +152,10 @@ mostrarRegistros rs = mapM_ mostrarRegistro rs
 mostrarRegistro :: RegistroFinanciero -> IO ()
 mostrarRegistro r = do
     putStrLn "----------------------------"
+    putStrLn $ "ID:          " ++ show (idRegistro r)
     putStrLn $ "Tipo:        " ++ show (tipoRegistro r)
     putStrLn $ "Monto:       " ++ show (montoRegistro r)
-    putStrLn $ "Categoria:   " ++ categoriaRegistro r
+    putStrLn $ "ID Categoria:" ++ show (idCategoriaRegistro r)
     putStrLn $ "Fecha:       " ++ show (fechaRegistro r)
     putStrLn $ "Descripcion: " ++ descripcionRegistro r
     putStrLn $ "Etiquetas:   " ++ unwords (etiquetasRegistro r)
@@ -170,7 +179,7 @@ subMenuEditarRegistroFinanciero = do
                 then putStrLn "Numero invalido."
                 else do
                     putStrLn "Ingrese los nuevos datos:"
-                    nuevo <- solicitarDatosRegistro
+                    nuevo <- solicitarDatosRegistro (idRegistro (registros !! (indice - 1)))
                     let actualizados = reemplazarEn (indice - 1) nuevo registros
                     guardarRegistros actualizados
                     putStrLn "Registro editado y guardado correctamente."
@@ -204,9 +213,10 @@ mostrarRegistrosNumerados registros =
   where
     mostrarConNumero (n, r) = do
         putStrLn $ "\n[" ++ show n ++ "]"
+        putStrLn $ "  ID:        " ++ show (idRegistro r)
         putStrLn $ "  Tipo:      " ++ show (tipoRegistro r)
         putStrLn $ "  Monto:     " ++ show (montoRegistro r)
-        putStrLn $ "  Categoria: " ++ categoriaRegistro r
+        putStrLn $ "  ID Categoria: " ++ show (idCategoriaRegistro r)
         putStrLn $ "  Fecha:     " ++ show (fechaRegistro r)
         putStrLn $ "  Descripcion: " ++ descripcionRegistro r
 

@@ -5,5 +5,4 @@ Salud
 Entretenimiento
 Servicios
 Salario
-Ahorro
 Inversion

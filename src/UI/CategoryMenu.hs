@@ -3,12 +3,14 @@ module UI.CategoryMenu where
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 
+import FileManager (cargarCategorias)
 import qualified Services.CategoryService as Service
+import Services.FinanceRegistryService (cargarRegistros)
 import Models
 
 -- Menu especifico para el CRUD de categorias.
-menuCategorias :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
-menuCategorias categorias registros = do
+menuCategoria :: IO ()
+menuCategoria = do
     putStrLn ""
     putStrLn "===== Gestion de Categorias ====="
     putStrLn "1. Crear categoria"
@@ -16,38 +18,43 @@ menuCategorias categorias registros = do
     putStrLn "3. Buscar categoria por ID"
     putStrLn "4. Actualizar categoria"
     putStrLn "5. Eliminar categoria"
-    putStrLn "6. Volver al menu principal"
+    putStrLn "6. Volver al menu de registros financieros"
     putStr "Opcion: "
     hFlush stdout
 
     opcion <- getLine
 
     case opcion of
-        "1" -> crearCategoriaMenu categorias registros
-        "2" -> listarCategoriasMenu categorias registros
-        "3" -> buscarCategoriaMenu categorias registros
-        "4" -> actualizarCategoriaMenu categorias registros
-        "5" -> eliminarCategoriaMenu categorias registros
-        "6" -> return categorias
+        "1" -> crearCategoriaMenu >> menuCategoria
+        "2" -> listarCategoriasMenu >> menuCategoria
+        "3" -> buscarCategoriaMenu >> menuCategoria
+        "4" -> actualizarCategoriaMenu >> menuCategoria
+        "5" -> eliminarCategoriaMenu >> menuCategoria
+        "6" -> putStrLn "Volviendo al menu de registros financieros..."
         _ -> do
             putStrLn "Opcion invalida."
-            menuCategorias categorias registros
+            menuCategoria
+
+menuCategorias :: IO ()
+menuCategorias = menuCategoria
+
+cargarCategoriasMenu :: IO [Categoria]
+cargarCategoriasMenu = cargarCategorias
 
 -- Lee los datos necesarios para crear una categoria.
-crearCategoriaMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
-crearCategoriaMenu categorias registros = do
+crearCategoriaMenu :: IO ()
+crearCategoriaMenu = do
     putStr "Nombre de la nueva categoria: "
     hFlush stdout
     nombre <- getLine
 
+    categorias <- cargarCategoriasMenu
     resultado <- Service.crearCategoriaService nombre categorias
     case resultado of
-        Left mensaje -> do
+        Left mensaje ->
             putStrLn mensaje
-            menuCategorias categorias registros
-        Right nuevasCategorias -> do
+        Right _ -> do
             putStrLn "Categoria creada correctamente."
-            menuCategorias nuevasCategorias registros
 
 mostrarTituloYCategorias :: [Categoria] -> IO ()
 mostrarTituloYCategorias categorias = do
@@ -57,14 +64,15 @@ mostrarTituloYCategorias categorias = do
     putStrLn ""
 
 -- Muestra todas las categorias registradas.
-listarCategoriasMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
-listarCategoriasMenu categorias registros = do
+listarCategoriasMenu :: IO ()
+listarCategoriasMenu = do
+    categorias <- cargarCategoriasMenu
     mostrarTituloYCategorias categorias
-    menuCategorias categorias registros
 
 -- Lee un ID y muestra la categoria encontrada.
-buscarCategoriaMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
-buscarCategoriaMenu categorias registros = do
+buscarCategoriaMenu :: IO ()
+buscarCategoriaMenu = do
+    categorias <- cargarCategoriasMenu
     mostrarTituloYCategorias categorias
     putStr "Ingrese el ID de la categoria: "
     hFlush stdout
@@ -77,20 +85,18 @@ buscarCategoriaMenu categorias registros = do
                 Nothing -> putStrLn "No existe una categoria con ese ID."
                 Just categoria -> mostrarCategoria categoria
 
-    menuCategorias categorias registros
-
 -- Lee los datos necesarios para actualizar una categoria existente.
-actualizarCategoriaMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
-actualizarCategoriaMenu categorias registros = do
+actualizarCategoriaMenu :: IO ()
+actualizarCategoriaMenu = do
+    categorias <- cargarCategoriasMenu
     mostrarTituloYCategorias categorias
     putStr "Ingrese el ID de la categoria a actualizar: "
     hFlush stdout
     textoId <- getLine
 
     case readMaybe textoId :: Maybe Int of
-        Nothing -> do
+        Nothing ->
             putStrLn "ID invalido. Debe ingresar un numero."
-            menuCategorias categorias registros
 
         Just idBuscado -> do
             putStr "Nuevo nombre de la categoria: "
@@ -99,37 +105,34 @@ actualizarCategoriaMenu categorias registros = do
 
             resultado <- Service.actualizarCategoriaService idBuscado nuevoNombre categorias
             case resultado of
-                Left mensaje -> do
+                Left mensaje ->
                     putStrLn mensaje
-                    menuCategorias categorias registros
 
-                Right categoriasActualizadas -> do
+                Right _ ->
                     putStrLn "Categoria actualizada correctamente."
-                    menuCategorias categoriasActualizadas registros
 
 -- Lee el ID de la categoria que se desea eliminar.
-eliminarCategoriaMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
-eliminarCategoriaMenu categorias registros = do
+eliminarCategoriaMenu :: IO ()
+eliminarCategoriaMenu = do
+    categorias <- cargarCategoriasMenu
     mostrarTituloYCategorias categorias
     putStr "Ingrese el ID de la categoria a eliminar: "
     hFlush stdout
     textoId <- getLine
 
     case readMaybe textoId :: Maybe Int of
-        Nothing -> do
+        Nothing ->
             putStrLn "ID invalido. Debe ingresar un numero."
-            menuCategorias categorias registros
 
         Just idBuscado -> do
+            registros <- cargarRegistros
             resultado <- Service.eliminarCategoriaService idBuscado categorias registros
             case resultado of
-                Left mensaje -> do
+                Left mensaje ->
                     putStrLn mensaje
-                    menuCategorias categorias registros
 
-                Right categoriasActualizadas -> do
+                Right _ ->
                     putStrLn "Categoria eliminada correctamente."
-                    menuCategorias categoriasActualizadas registros
 
 -- Muestra una lista de categorias.
 mostrarCategorias :: [Categoria] -> IO ()
