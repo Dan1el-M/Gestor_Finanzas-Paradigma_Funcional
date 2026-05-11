@@ -112,15 +112,20 @@ compararRealVsPresupuesto categorias presupuestos registros =
 excedePresupuestoConNuevoRegistro :: [Presupuesto] -> [RegistroFinanciero] -> RegistroFinanciero -> Bool
 excedePresupuestoConNuevoRegistro presupuestos existentes nuevo =
     case tipoRegistro nuevo of
-        Gasto ->
-            case buscarPresupuestoPorCategoria (idCategoriaRegistro nuevo) presupuestos of
-                Nothing -> False
-                Just p ->
-                    case tipoPresupuesto p of
-                        MetaMinima   -> False
-                        LimiteMaximo ->
-                            let limite = montoPresupuesto p
-                                realActual = gastoRealCategoria (idCategoriaRegistro nuevo) existentes
-                                realNuevo = realActual + montoRegistro nuevo
-                            in limite > 0 && realNuevo > limite
-        _ -> False
+        Gasto -> excedePresupuestoConNuevoMonto presupuestos existentes (idCategoriaRegistro nuevo) (montoRegistro nuevo)
+        _     -> False
+
+-- Determina si al agregar un gasto por `idCategoria` y `monto` se excede el presupuesto.
+-- Se usa para poder advertir al usuario apenas ingresa monto + categorÃ­a (sin pedir fecha/descripcion).
+excedePresupuestoConNuevoMonto :: [Presupuesto] -> [RegistroFinanciero] -> Int -> Double -> Bool
+excedePresupuestoConNuevoMonto presupuestos existentes idCat monto =
+    case buscarPresupuestoPorCategoria idCat presupuestos of
+        Nothing -> False
+        Just p ->
+            case tipoPresupuesto p of
+                MetaMinima   -> False
+                LimiteMaximo ->
+                    let limite = montoPresupuesto p
+                        realActual = gastoRealCategoria idCat existentes
+                        realNuevo = realActual + monto
+                    in limite > 0 && realNuevo > limite

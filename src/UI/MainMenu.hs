@@ -3,10 +3,10 @@ module UI.MainMenu where
 import UI.ReportMenu (menuReportes)
 import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
+import UI.BudgetMenu (menuPresupuestos)
 import UI.FinanceAnalysisMenu (menuAnalisisFinanciero)
 import UI.UIHelpers (titulo, cerrar, err)
 import UI.SimulationMenu (menuSimulacion)
-import UI.BudgetMenu (menuPresupuestos)
 import UI.RuleMenu (menuReglas)
 
 iniciarAplicacion :: IO ()

@@ -40,25 +40,41 @@ guardarLineasArchivo ruta lineas =
 cargarCategorias :: IO [Categoria]
 cargarCategorias = do
     lineas <- leerLineasArchivoSeguro rutaCategorias
-    let categoriasConId = zip [1..] (filter (not . null) lineas)
-    return [Categoria idCat nombre | (idCat, nombre) <- categoriasConId]
+    let lineasNoVacias = filter (not . null) lineas
+    let categoriasParseadas = [c | Just c <- map lineaACategoria lineasNoVacias]
+    if length categoriasParseadas == length lineasNoVacias
+        then return categoriasParseadas
+        else do
+            -- Compatibilidad: formato viejo (1 nombre por línea, IDs auto-asignados).
+            -- Importante: este formato no preserva IDs al eliminar/reordenar categorías.
+            let categoriasConId = zip [1..] lineasNoVacias
+            return [Categoria idCat nombre | (idCat, nombre) <- categoriasConId]
+  where
+    -- Convierte una línea del archivo a una Categoria; si falla el parseo retorna Nothing.
+    lineaACategoria :: String -> Maybe Categoria
+    lineaACategoria linea =
+        case reads linea of
+            [(c, "")] -> Just c
+            _         -> Nothing
 
 guardarCategorias :: [Categoria] -> IO ()
 guardarCategorias categorias =
-    guardarLineasArchivo rutaCategorias (map nombreCategoria categorias)
+    -- Guardar con Read/Show para preservar IDs de categoría (evita desincronización con registros/presupuestos).
+    guardarLineasArchivo rutaCategorias (map show categorias)
 
 -- Carga la lista de presupuestos desde presupuestos.txt usando Read/Show (1 presupuesto por línea).
 cargarPresupuestos :: IO [Presupuesto]
 cargarPresupuestos = do
     lineas <- leerLineasArchivoSeguro rutaPresupuestos
-    let presupuestos = [p | Just p <- map lineaAPresupuesto lineas]
+    let lineasLimpias = map (filter (/= '\r')) lineas
+    let presupuestos = [p | Just p <- map lineaAPresupuesto lineasLimpias]
     return presupuestos
   where
     -- Convierte una línea del archivo a un Presupuesto; si falla el parseo retorna Nothing.
     lineaAPresupuesto :: String -> Maybe Presupuesto
     lineaAPresupuesto linea =
         case reads linea of
-            [(p, "")] -> Just p
+            [(p, resto)] | all (`elem` " \t") resto -> Just p
             _         -> Nothing
 
 -- Guarda la lista de presupuestos en presupuestos.txt usando Read/Show (1 presupuesto por línea).
