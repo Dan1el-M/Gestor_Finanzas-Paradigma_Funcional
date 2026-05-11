@@ -69,8 +69,10 @@ asignarPresupuestoCategoria idCat montoNuevo presupuestos =
 -- Suma los montos de los registros de tipo Gasto por categoría.
 acumuladoGastosPorCategoria :: [RegistroFinanciero] -> [(Int, Double)]
 acumuladoGastosPorCategoria registros =
-    foldl acumular [] (filter (\r -> tipoRegistro r == Gasto) registros)
+    foldl acumular [] (filter esEgreso registros)
   where
+    esEgreso r = tipoRegistro r == Gasto || tipoRegistro r == Inversion
+
     acumular :: [(Int, Double)] -> RegistroFinanciero -> [(Int, Double)]
     acumular acc r = sumarMonto (idCategoriaRegistro r) (montoRegistro r) acc
 
@@ -112,8 +114,9 @@ compararRealVsPresupuesto categorias presupuestos registros =
 excedePresupuestoConNuevoRegistro :: [Presupuesto] -> [RegistroFinanciero] -> RegistroFinanciero -> Bool
 excedePresupuestoConNuevoRegistro presupuestos existentes nuevo =
     case tipoRegistro nuevo of
-        Gasto -> excedePresupuestoConNuevoMonto presupuestos existentes (idCategoriaRegistro nuevo) (montoRegistro nuevo)
-        _     -> False
+        Gasto     -> excedePresupuestoConNuevoMonto presupuestos existentes (idCategoriaRegistro nuevo) (montoRegistro nuevo)
+        Inversion -> excedePresupuestoConNuevoMonto presupuestos existentes (idCategoriaRegistro nuevo) (montoRegistro nuevo)
+        _         -> False
 
 -- Determina si al agregar un gasto por `idCategoria` y `monto` se excede el presupuesto.
 -- Se usa para poder advertir al usuario apenas ingresa monto + categorÃ­a (sin pedir fecha/descripcion).
