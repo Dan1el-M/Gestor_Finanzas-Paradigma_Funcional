@@ -36,7 +36,7 @@ ejecutarOpcion opcion =
         "1" -> menuRegistroFinanciero >> menuPrincipal
         "2" -> ok "Modulo de presupuestos pendiente." >> menuPrincipal
         "3" -> ok "Modulo de reglas pendiente." >> menuPrincipal
-        "4" -> ok menuAnalisisFinanciero >> menuPrincipal
+        "4" -> menuAnalisisFinanciero >> menuPrincipal
         "5" -> ok "Modulo de simulacion pendiente." >> menuPrincipal
         "6" -> ok "Modulo de reportes pendiente." >> menuPrincipal
         "7" -> do
