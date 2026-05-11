@@ -2,6 +2,11 @@
 
 module FileManager where
 
+import Control.Exception (catch, throwIO)
+import System.IO.Error (isDoesNotExistError)
+import Control.DeepSeq (force)
+import Control.Exception (evaluate)
+
 {-
 
 Guardar registros en data/registros.txt
@@ -33,7 +38,15 @@ rutaCategorias = "data/categorias.txt"
 leerLineasArchivo :: FilePath -> IO [String]
 leerLineasArchivo ruta = do
     contenido <- readFile ruta
-    return (lines contenido)
+    evaluate (force (lines contenido))  -- fuerza lectura completa y cierra el archivo
+
+leerLineasArchivoSeguro :: FilePath -> IO [String]
+leerLineasArchivoSeguro ruta =
+    leerLineasArchivo ruta `catch` manejarError
+  where
+    manejarError e
+        | isDoesNotExistError e = return []
+        | otherwise             = throwIO e
 
 -- Guarda una lista de líneas en un archivo.
 -- Cada elemento de la lista se guarda en una línea separada.

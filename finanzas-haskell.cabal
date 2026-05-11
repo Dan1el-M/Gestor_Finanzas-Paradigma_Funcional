@@ -30,13 +30,16 @@ executable finanzas-haskell
         FileManager
         UI.MainMenu
         UI.CategoryMenu
+        UI.FinanceRegistryMenu
+        Services.FinanceRegistryService
 
     -- Dependencias base.
     -- base: funciones principales de Haskell.
     -- time: manejo de fechas con Data.Time.
     build-depends:
         base >=4.14 && <5,
-        time >=1.9
+        time >=1.9,
+        deepseq >=1.4 
 
     -- Versión del lenguaje Haskell que vamos a usar.
     default-language: Haskell2010

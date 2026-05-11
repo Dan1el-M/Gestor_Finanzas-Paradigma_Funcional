@@ -1,9 +1,8 @@
 module UI.MainMenu where
 
-import UI.CategoryMenu (menuCategoria)
 import System.IO (hFlush, stdout)
-import FileManager
-import Reports 
+import UI.CategoryMenu (menuCategoria)
+import UI.FinanceRegistryMenu (menuRegistroFinanciero)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
@@ -17,14 +16,12 @@ menuPrincipal :: IO ()
 menuPrincipal = do
     putStrLn ""
     putStrLn "Seleccione una opcion:"
-    putStrLn "1. Ingresar movimiento financiero"
-    putStrLn "2. Ver registros financieros"
+    putStrLn "1. Gestionar registros financieros"
     putStrLn "3. Gestionar presupuestos"
     putStrLn "4. Evaluar reglas y alertas"
     putStrLn "5. Ver analisis financiero"
     putStrLn "6. Simular escenario financiero"
     putStrLn "7. Generar reportes"
-    putStrLn "8. Guardar datos"
     putStrLn "9. CRUD Categorias"
     putStrLn "10. Salir"
     putStr "Opcion: "
@@ -33,51 +30,38 @@ menuPrincipal = do
     opcion <- getLine
     ejecutarOpcion opcion
 
--- Ejecuta la acción correspondiente según la opción ingresada.
--- Por ahora algunas opciones son placeholders,
--- luego cada compañero conectará aquí sus funciones.
 ejecutarOpcion :: String -> IO ()
 ejecutarOpcion opcion =
     case opcion of
         "1" -> do
-            putStrLn "Modulo de registro financiero pendiente de implementar."
-            menuPrincipal
-
-        "2" -> do
-            putStrLn "Modulo para ver registros pendiente de implementar."
+            menuRegistroFinanciero
             menuPrincipal
 
         "3" -> do
-            putStrLn "Modulo de presupuestos pendiente de implementar."
+            putStrLn "Modulo de presupuestos pendiente."
             menuPrincipal
 
         "4" -> do
-            putStrLn "Modulo de reglas y alertas pendiente de implementar."
+            putStrLn "Modulo de reglas pendiente."
             menuPrincipal
 
         "5" -> do
-            putStrLn "Modulo de analisis financiero pendiente de implementar."
+            putStrLn "Modulo de analisis pendiente."
             menuPrincipal
 
         "6" -> do
-            putStrLn "Modulo de simulacion pendiente de implementar."
+            putStrLn "Modulo de simulacion pendiente."
             menuPrincipal
 
         "7" -> do
-            putStrLn "Generando reporte basico de prueba..."
-            putStrLn (generarResumenBasico [])
-            menuPrincipal
-
-        "8" -> do
-            putStrLn "Guardando datos de prueba..."
-            guardarLineasArchivo rutaRegistros []
-            putStrLn "Datos guardados correctamente."
+            putStrLn "Modulo de reportes pendiente."
             menuPrincipal
 
         "9" -> do
             menuCategoria
+            menuPrincipal
 
-        "10" -> do
+        "10" ->
             putStrLn "Saliendo del sistema..."
 
         _ -> do
