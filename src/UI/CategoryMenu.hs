@@ -3,7 +3,7 @@ module UI.CategoryMenu where
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 
-import qualified CategoryService as Service
+import qualified Services.CategoryService as Service
 import Models
 
 -- Menu especifico para el CRUD de categorias.
@@ -133,7 +133,7 @@ mostrarCategoriasRec [] = return ()
 mostrarCategoriasRec (categoria:resto) = do
     mostrarCategoria categoria
     mostrarCategoriasRec resto
-    
+
 -- Muestra una categoria individual.
 mostrarCategoria :: Categoria -> IO ()
 mostrarCategoria categoria = do

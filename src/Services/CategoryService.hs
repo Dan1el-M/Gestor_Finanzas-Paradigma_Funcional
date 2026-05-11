@@ -1,4 +1,4 @@
-module CategoryService
+module Services.CategoryService
     ( crearCategoriaService
     , buscarCategoriaPorId
     , buscarCategoriaPorNombre

@@ -28,7 +28,7 @@ executable finanzas-haskell
         Simulations
         Reports
         FileManager
-        CategoryService
+        Services.CategoryService
         UI.MainMenu
         UI.CategoryMenu
 
