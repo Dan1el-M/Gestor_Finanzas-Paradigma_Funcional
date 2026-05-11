@@ -1,9 +1,8 @@
-Alimentacion
-Transporte
-Educacion
-Salud
-Entretenimiento
-Servicios
-Salario
-Inversion
-Futbol
+Categoria {idCategoria = 1, nombreCategoria = "Alimentacion"}
+Categoria {idCategoria = 2, nombreCategoria = "Transporte"}
+Categoria {idCategoria = 4, nombreCategoria = "Salud"}
+Categoria {idCategoria = 5, nombreCategoria = "Entretenimiento"}
+Categoria {idCategoria = 6, nombreCategoria = "Servicios"}
+Categoria {idCategoria = 7, nombreCategoria = "Salario"}
+Categoria {idCategoria = 8, nombreCategoria = "Inversion"}
+Categoria {idCategoria = 9, nombreCategoria = "Futbol"}
