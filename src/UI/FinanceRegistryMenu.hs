@@ -4,92 +4,65 @@ import System.IO (hFlush, stdout)
 import Models
 import Services.FinanceRegistryService
 import Services.DateService
-import UI.CategoryMenu (menuCategoria,pedirIdCategoria)
+import UI.CategoryMenu (menuCategoria, pedirIdCategoria, mostrarCategorias)
 import Utils (splitOn)
+import Text.Read (readMaybe)
+import FileManager (cargarCategorias)
+import UI.UIHelpers (titulo, cerrar, ok, err, padR)
+
+-- ─── Menu principal ────────────────────────────────────────
 
 menuRegistroFinanciero :: IO ()
 menuRegistroFinanciero = do
-    putStrLn "===================================="
-    putStrLn "  Gestion de Registros Financieros"
-    putStrLn "===================================="
-    putStrLn ""
-    putStrLn "Seleccione una opcion:"
-    putStrLn "1. Agregar nuevo registro financiero"
-    putStrLn "2. Ver registros financieros"
-    putStrLn "3. Editar registro financiero"
-    putStrLn "4. Eliminar registro financiero"
-    putStrLn "5. Gestionar categorías"
-    putStrLn "6. Volver al menu principal"
-    putStr "Opcion: "
+    titulo "Registros Financieros"
+    putStrLn "  ║  1. Agregar registro                             ║"
+    putStrLn "  ║  2. Ver registros                                ║"
+    putStrLn "  ║  3. Editar registro                              ║"
+    putStrLn "  ║  4. Eliminar registro                            ║"
+    putStrLn "  ║  5. Gestionar categorias                         ║"
+    putStrLn "  ║  6. Volver al menu principal                     ║"
+    cerrar
+    putStr "  Opcion » "
     hFlush stdout
-
     opcion <- getLine
     ejecutarOpcion opcion
-    
 
 ejecutarOpcion :: String -> IO ()
 ejecutarOpcion opcion =
     case opcion of
-        "1" -> do
-            subMenuAgregarRegistroFinanciero
-            menuRegistroFinanciero
-
+        "1" -> subMenuAgregarRegistroFinanciero >> menuRegistroFinanciero
         "2" -> do
             registros <- cargarRegistros
-            mostrarRegistros registros
+            mostrarTablaRegistros registros
             menuRegistroFinanciero
+        "3" -> subMenuEditarRegistroFinanciero >> menuRegistroFinanciero
+        "4" -> subMenuEliminarRegistroFinanciero >> menuRegistroFinanciero
+        "5" -> menuCategoria >> menuRegistroFinanciero
+        "6" -> ok "Volviendo al menu principal..."
+        _   -> err "Opcion invalida." >> menuRegistroFinanciero
 
-        "3" -> do
-            subMenuEditarRegistroFinanciero
-            menuRegistroFinanciero
-
-        "4" -> do
-            subMenuEliminarRegistroFinanciero
-            menuRegistroFinanciero
-
-        "5" -> do
-            menuCategoria
-            menuRegistroFinanciero
-
-        "6" ->
-            putStrLn "Volviendo al menu principal..."
-
-        _ -> do
-            putStrLn "Opcion invalida. Intente de nuevo."
-            menuRegistroFinanciero
+-- ─── Agregar ───────────────────────────────────────────────
 
 subMenuAgregarRegistroFinanciero :: IO ()
 subMenuAgregarRegistroFinanciero = do
-    putStrLn "===================================="
-    putStrLn " Agregar Nuevo Registro Financiero"
-    putStrLn "===================================="
+    titulo "Agregar Nuevo Registro Financiero"
+    cerrar
     existentes <- cargarRegistros
     nuevo <- solicitarDatosRegistro (siguienteIdRegistro existentes)
     let actualizados = agregarRegistro existentes nuevo
     guardarRegistros actualizados
-    putStrLn "Registro agregado y guardado correctamente."
+    ok "Registro agregado y guardado correctamente."
 
 solicitarDatosRegistro :: Int -> IO RegistroFinanciero
 solicitarDatosRegistro idNuevo = do
-    tipo <- pedirTipo
-
-    putStr "Monto: "
-    hFlush stdout
-    monto <- readLn :: IO Double
-
-    putStr "ID de categoria: "
+    tipo  <- pedirTipo
+    monto <- pedirMonto
     idCat <- pedirIdCategoria
-
     fecha <- pedirFecha
-
-    putStr "Descripcion: "
+    putStr "  Descripcion     » "
     hFlush stdout
     desc <- getLine
-
-    putStr "Etiquetas (separadas por coma, ej: fijo,variable): "
-    hFlush stdout
-    etiquetasRaw <- getLine
-    let etiquetas = splitOn ',' etiquetasRaw
+    etiquetas <- pedirEtiquetas   -- ← reemplaza las dos líneas anteriores
 
     return $ RegistroFinanciero
         { idRegistro          = idNuevo
@@ -101,18 +74,23 @@ solicitarDatosRegistro idNuevo = do
         , etiquetasRegistro   = etiquetas
         }
 
-siguienteIdRegistro :: [RegistroFinanciero] -> Int
-siguienteIdRegistro [] = 1
-siguienteIdRegistro registros = maximum (map idRegistro registros) + 1
+pedirMonto :: IO Double
+pedirMonto = do
+    putStr "  Monto           » "
+    hFlush stdout
+    input <- getLine
+    case readMaybe input :: Maybe Double of
+        Nothing -> err "Debe ingresar un numero." >> pedirMonto
+        Just m | m <= 0 -> err "El monto debe ser mayor a 0." >> pedirMonto
+        Just m  -> return m
 
 pedirTipo :: IO TipoRegistro
 pedirTipo = do
-    putStrLn "Tipo de registro:"
-    putStrLn "1. Ingreso"
-    putStrLn "2. Gasto"
-    putStrLn "3. Ahorro"
-    putStrLn "4. Inversion"
-    putStr "Opcion: "
+    putStrLn ""
+    putStrLn "  Tipo de registro:"
+    putStrLn "    1. Ingreso    2. Gasto"
+    putStrLn "    3. Ahorro     4. Inversion"
+    putStr "  Opcion » "
     hFlush stdout
     op <- getLine
     case op of
@@ -120,93 +98,123 @@ pedirTipo = do
         "2" -> return Gasto
         "3" -> return Ahorro
         "4" -> return Inversion
-        _   -> do
-            putStrLn "Opcion invalida, seleccione de nuevo."
-            pedirTipo
+        _   -> err "Opcion invalida." >> pedirTipo
 
-mostrarRegistros :: [RegistroFinanciero] -> IO ()
-mostrarRegistros [] = putStrLn "No hay registros."
-mostrarRegistros rs = mapM_ mostrarRegistro rs
+pedirEtiquetas :: IO [String]
+pedirEtiquetas = do
+    putStr "  Etiquetas (fijo,variable) » "
+    hFlush stdout
+    input <- getLine
+    let etiquetas = filter (not . null) (splitOn ',' input)
+    if null etiquetas
+        then err "Debe ingresar al menos una etiqueta." >> pedirEtiquetas
+        else return etiquetas
 
-mostrarRegistro :: RegistroFinanciero -> IO ()
-mostrarRegistro r = do
-    putStrLn "----------------------------"
-    putStrLn $ "ID:          " ++ show (idRegistro r)
-    putStrLn $ "Tipo:        " ++ show (tipoRegistro r)
-    putStrLn $ "Monto:       " ++ show (montoRegistro r)
-    putStrLn $ "ID Categoria:" ++ show (idCategoriaRegistro r)
-    putStrLn $ "Fecha:       " ++ show (fechaRegistro r)
-    putStrLn $ "Descripcion: " ++ descripcionRegistro r
-    putStrLn $ "Etiquetas:   " ++ unwords (etiquetasRegistro r)
+siguienteIdRegistro :: [RegistroFinanciero] -> Int
+siguienteIdRegistro [] = 1
+siguienteIdRegistro rs = maximum (map idRegistro rs) + 1
 
+-- ─── Tabla de registros ────────────────────────────────────
+mostrarTablaRegistros :: [RegistroFinanciero] -> IO ()
+mostrarTablaRegistros [] = do
+    titulo "Registros Financieros"
+    putStrLn "  ║  No hay registros registrados.                   ║"
+    cerrar
+mostrarTablaRegistros rs = do
+    titulo "Registros Financieros"
+    cerrar
+    categorias <- cargarCategorias
+    putStrLn $ "  " ++ encabezado
+    putStrLn $ "  " ++ separador
+    mapM_ (\(n, r) -> putStrLn $ "  " ++ filaConNumero categorias n r) (zip [1 :: Int ..] (reverse rs))
+    putStrLn $ "  " ++ separador
+    putStrLn $ "  Total registros: " ++ show (length rs)
+  where
+    encabezado = padR 5 "N"
+              ++ "│ " ++ padR 6  "ID"
+              ++ "│ " ++ padR 11 "Tipo"
+              ++ "│ " ++ padR 10 "Monto"
+              ++ "│ " ++ padR 12 "Fecha"
+              ++ "│ " ++ padR 15 "Descripcion"
+              ++ "│ " ++ padR 20  "Categoria"
+    separador  = replicate (length encabezado) '-'
+
+filaConNumero :: [Categoria] -> Int -> RegistroFinanciero -> String
+filaConNumero categorias n r =
+    padR 5 (show n)
+    ++ "│ " ++ padR 6  (show (idRegistro r))
+    ++ "│ " ++ padR 11 (show (tipoRegistro r))
+    ++ "│ " ++ padR 10 (show (montoRegistro r))
+    ++ "│ " ++ padR 12 (show (fechaRegistro r))
+    ++ "│ " ++ padR 15 (descripcionRegistro r)
+    ++ "| " ++ padR 20 (show nombreCat)    -- ← show para ver exactamente que contiene
+  where
+    nombreCat = case filter (\c -> idCategoria c == idCategoriaRegistro r) categorias of
+        (c:_) -> filter (/= '\r') (nombreCategoria c)
+        []    -> "Sin categoria"
+
+-- ─── Editar ────────────────────────────────────────────────
 
 subMenuEditarRegistroFinanciero :: IO ()
 subMenuEditarRegistroFinanciero = do
-    putStrLn "===================================="
-    putStrLn " Editar Registro Financiero"
-    putStrLn "===================================="
+    titulo "Editar Registro Financiero"
+    cerrar
     registros <- cargarRegistros
     if null registros
-        then putStrLn "No hay registros para editar."
+        then err "No hay registros para editar."
         else do
-            mostrarRegistrosNumerados registros
-            putStr "Numero de registro a editar: "
+            mostrarTablaRegistros registros
+            putStr "\n  Numero de la tabla a editar » "
             hFlush stdout
             input <- getLine
-            let indice = read input :: Int
-            if indice < 1 || indice > length registros
-                then putStrLn "Numero invalido."
-                else do
-                    putStrLn "Ingrese los nuevos datos:"
-                    nuevo <- solicitarDatosRegistro (idRegistro (registros !! (indice - 1)))
-                    let actualizados = reemplazarEn (indice - 1) nuevo registros
-                    guardarRegistros actualizados
-                    putStrLn "Registro editado y guardado correctamente."
+            case readMaybe input :: Maybe Int of
+                Nothing -> err "Debe ingresar un numero."
+                Just n ->
+                    if n < 1 || n > length registros
+                        then err "Numero fuera de rango."
+                        else do
+                            -- convertir numero de tabla a indice real en la lista original
+                            let listaVisible = reverse registros
+                                rOriginal    = listaVisible !! (n - 1)
+                                indiceReal   = length registros - n
+                            nuevo <- solicitarDatosRegistro (idRegistro rOriginal)
+                            let actualizados = reemplazarEn indiceReal nuevo registros
+                            guardarRegistros actualizados
+                            ok "Registro editado y guardado correctamente."
+
+-- ─── Eliminar ──────────────────────────────────────────────
 
 subMenuEliminarRegistroFinanciero :: IO ()
 subMenuEliminarRegistroFinanciero = do
-    putStrLn "===================================="
-    putStrLn " Eliminar Registro Financiero"
-    putStrLn "===================================="
+    titulo "Eliminar Registro Financiero"
+    cerrar
     registros <- cargarRegistros
     if null registros
-        then putStrLn "No hay registros para eliminar."
+        then err "No hay registros para eliminar."
         else do
-            mostrarRegistrosNumerados registros
-            putStr "Numero de registro a eliminar: "
+            mostrarTablaRegistros registros
+            putStr "\n  Numero de la tabla a eliminar » "
             hFlush stdout
             input <- getLine
-            let indice = read input :: Int
-            if indice < 1 || indice > length registros
-                then putStrLn "Numero invalido."
-                else do
-                    let actualizados = eliminarEn (indice - 1) registros
-                    guardarRegistros actualizados
-                    putStrLn "Registro eliminado correctamente."
+            case readMaybe input :: Maybe Int of
+                Nothing -> err "Debe ingresar un numero."
+                Just n ->
+                    if n < 1 || n > length registros
+                        then err "Numero fuera de rango."
+                        else do
+                            let indiceReal = length registros - n
+                            let actualizados = eliminarEn indiceReal registros
+                            guardarRegistros actualizados
+                            ok "Registro eliminado correctamente."
+-- ─── Utilidades de lista ───────────────────────────────────
 
-
--- Muestra los registros con número de posición
-mostrarRegistrosNumerados :: [RegistroFinanciero] -> IO ()
-mostrarRegistrosNumerados registros =
-    mapM_ mostrarConNumero (zip [1 :: Int ..] registros)
-  where
-    mostrarConNumero (n, r) = do
-        putStrLn $ "\n[" ++ show n ++ "]"
-        putStrLn $ "  ID:        " ++ show (idRegistro r)
-        putStrLn $ "  Tipo:      " ++ show (tipoRegistro r)
-        putStrLn $ "  Monto:     " ++ show (montoRegistro r)
-        putStrLn $ "  ID Categoria: " ++ show (idCategoriaRegistro r)
-        putStrLn $ "  Fecha:     " ++ show (fechaRegistro r)
-        putStrLn $ "  Descripcion: " ++ descripcionRegistro r
-
--- Reemplaza el elemento en la posición dada
 reemplazarEn :: Int -> a -> [a] -> [a]
-reemplazarEn _ _ []     = []
+reemplazarEn _ _ []         = []
 reemplazarEn 0 nuevo (_:xs) = nuevo : xs
 reemplazarEn n nuevo (x:xs) = x : reemplazarEn (n - 1) nuevo xs
 
--- Elimina el elemento en la posición dada
 eliminarEn :: Int -> [a] -> [a]
 eliminarEn _ []     = []
 eliminarEn 0 (_:xs) = xs
 eliminarEn n (x:xs) = x : eliminarEn (n - 1) xs
+
