@@ -77,7 +77,7 @@ mostrarAlertas :: [Alerta] -> IO ()
 mostrarAlertas [] = return ()
 mostrarAlertas alertas = do
     putStrLn ""
-    putStrLn "Alertas generadas por reglas:"
+    putStrLn "  Alertas generadas por reglas:"
     mapM_ mostrarAlerta alertas
 
 mostrarAlerta :: Alerta -> IO ()

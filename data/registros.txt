@@ -1,3 +1,5 @@
+RegistroFinanciero {idRegistro = 9, tipoRegistro = Gasto, montoRegistro = 2.3e7, idCategoriaRegistro = 3, fechaRegistro = 2020-07-14, descripcionRegistro = "Beca", etiquetasRegistro = ["variable"]}
+RegistroFinanciero {idRegistro = 8, tipoRegistro = Ahorro, montoRegistro = 2000.0, idCategoriaRegistro = 3, fechaRegistro = 2020-04-19, descripcionRegistro = "Prueba de reglas", etiquetasRegistro = ["fijo"]}
 RegistroFinanciero {idRegistro = 7, tipoRegistro = Gasto, montoRegistro = 5000.0, idCategoriaRegistro = 2, fechaRegistro = 2026-02-23, descripcionRegistro = "Si funciona", etiquetasRegistro = ["fijo"]}
 RegistroFinanciero {idRegistro = 6, tipoRegistro = Gasto, montoRegistro = 4000.0, idCategoriaRegistro = 2, fechaRegistro = 2026-03-13, descripcionRegistro = "uber", etiquetasRegistro = ["variable"]}
 RegistroFinanciero {idRegistro = 5, tipoRegistro = Gasto, montoRegistro = 2000.0, idCategoriaRegistro = 1, fechaRegistro = 2026-03-23, descripcionRegistro = "pizza", etiquetasRegistro = ["variable"]}
