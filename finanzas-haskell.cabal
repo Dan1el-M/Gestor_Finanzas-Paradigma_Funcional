@@ -41,3 +41,7 @@ executable finanzas-haskell
 
     -- Opciones útiles para mostrar advertencias al compilar.
     ghc-options: -Wall
+
+-- Para levantar el proyecto, ejecuta:
+--   cabal build
+--   cabal run

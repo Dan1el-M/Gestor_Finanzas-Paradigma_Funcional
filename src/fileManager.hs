@@ -1,5 +1,7 @@
 --Aquí va la lectura y escritura de archivos.
 
+module FileManager where
+
 {-
 
 Guardar registros en data/registros.txt
@@ -8,8 +10,6 @@ Guardar presupuestos
 Cargar categorías
 
 -}
-
-module FileManager where
 
 -- Este módulo manejará la persistencia en archivos .txt.
 -- Aquí irán funciones para guardar y cargar registros,
