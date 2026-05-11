@@ -46,3 +46,22 @@ cargarCategorias = do
 guardarCategorias :: [Categoria] -> IO ()
 guardarCategorias categorias =
     guardarLineasArchivo rutaCategorias (map nombreCategoria categorias)
+
+-- Carga la lista de presupuestos desde presupuestos.txt usando Read/Show (1 presupuesto por línea).
+cargarPresupuestos :: IO [Presupuesto]
+cargarPresupuestos = do
+    lineas <- leerLineasArchivoSeguro rutaPresupuestos
+    let presupuestos = [p | Just p <- map lineaAPresupuesto lineas]
+    return presupuestos
+  where
+    -- Convierte una línea del archivo a un Presupuesto; si falla el parseo retorna Nothing.
+    lineaAPresupuesto :: String -> Maybe Presupuesto
+    lineaAPresupuesto linea =
+        case reads linea of
+            [(p, "")] -> Just p
+            _         -> Nothing
+
+-- Guarda la lista de presupuestos en presupuestos.txt usando Read/Show (1 presupuesto por línea).
+guardarPresupuestos :: [Presupuesto] -> IO ()
+guardarPresupuestos presupuestos =
+    guardarLineasArchivo rutaPresupuestos (map show presupuestos)

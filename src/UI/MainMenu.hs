@@ -2,6 +2,7 @@ module UI.MainMenu where
 
 import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
+import UI.BudgetMenu (menuPresupuestos)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
@@ -29,6 +30,7 @@ menuPrincipal = do
     ejecutarOpcion opcion
 
 ejecutarOpcion :: String -> IO ()
+-- Ejecuta la opción elegida del menú principal y regresa al menú cuando corresponde.
 ejecutarOpcion opcion =
     case opcion of
         "1" -> do
@@ -36,7 +38,7 @@ ejecutarOpcion opcion =
             menuPrincipal
 
         "2" -> do
-            putStrLn "Modulo de presupuestos pendiente."
+            menuPresupuestos
             menuPrincipal
 
         "3" -> do
