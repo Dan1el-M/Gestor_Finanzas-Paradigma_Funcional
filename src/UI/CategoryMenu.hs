@@ -49,17 +49,23 @@ crearCategoriaMenu categorias registros = do
             putStrLn "Categoria creada correctamente."
             menuCategorias nuevasCategorias registros
 
--- Muestra todas las categorias registradas.
-listarCategoriasMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
-listarCategoriasMenu categorias registros = do
+mostrarTituloYCategorias :: [Categoria] -> IO ()
+mostrarTituloYCategorias categorias = do
     putStrLn ""
     putStrLn "Categorias registradas:"
     mostrarCategorias categorias
+    putStrLn ""
+
+-- Muestra todas las categorias registradas.
+listarCategoriasMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
+listarCategoriasMenu categorias registros = do
+    mostrarTituloYCategorias categorias
     menuCategorias categorias registros
 
 -- Lee un ID y muestra la categoria encontrada.
 buscarCategoriaMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
 buscarCategoriaMenu categorias registros = do
+    mostrarTituloYCategorias categorias
     putStr "Ingrese el ID de la categoria: "
     hFlush stdout
     textoId <- getLine
@@ -76,6 +82,7 @@ buscarCategoriaMenu categorias registros = do
 -- Lee los datos necesarios para actualizar una categoria existente.
 actualizarCategoriaMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
 actualizarCategoriaMenu categorias registros = do
+    mostrarTituloYCategorias categorias
     putStr "Ingrese el ID de la categoria a actualizar: "
     hFlush stdout
     textoId <- getLine
@@ -103,6 +110,7 @@ actualizarCategoriaMenu categorias registros = do
 -- Lee el ID de la categoria que se desea eliminar.
 eliminarCategoriaMenu :: [Categoria] -> [RegistroFinanciero] -> IO [Categoria]
 eliminarCategoriaMenu categorias registros = do
+    mostrarTituloYCategorias categorias
     putStr "Ingrese el ID de la categoria a eliminar: "
     hFlush stdout
     textoId <- getLine
