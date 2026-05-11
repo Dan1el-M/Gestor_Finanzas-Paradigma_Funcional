@@ -11,6 +11,8 @@ Cargar categorías
 
 module FileManager where
 
+import Models
+
 -- Este módulo manejará la persistencia en archivos .txt.
 -- Aquí irán funciones para guardar y cargar registros,
 -- presupuestos, reglas y categorías.
@@ -40,3 +42,16 @@ leerLineasArchivo ruta = do
 guardarLineasArchivo :: FilePath -> [String] -> IO ()
 guardarLineasArchivo ruta lineas =
     writeFile ruta (unlines lineas)
+
+-- Carga categorías desde data/categorias.txt
+-- Asigna IDs automáticamente comenzando desde 1
+cargarCategorias :: IO [Categoria]
+cargarCategorias = do
+    lineas <- leerLineasArchivo rutaCategorias
+    let categoriasConId = zip [1..] (filter (not . null) lineas)
+    return [Categoria idCat nombre | (idCat, nombre) <- categoriasConId]
+
+-- Guarda categorías en data/categorias.txt
+guardarCategorias :: [Categoria] -> IO ()
+guardarCategorias categorias =
+    guardarLineasArchivo rutaCategorias (map nombreCategoria categorias)
