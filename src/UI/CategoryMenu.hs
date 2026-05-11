@@ -5,7 +5,10 @@ import FileManager (cargarCategorias)
 import qualified Services.CategoryService as Service
 import Services.FinanceRegistryService (cargarRegistros)
 import Models
-import UI.UIHelpers (cerrar, err, menuOpciones, ok, opcion, prompt, promptOpcion, titulo)
+import UI.UIHelpers
+    ( cerrar, err, menuOpciones, ok, opcion, padR, prompt, promptOpcion
+    , titulo
+    )
 
 menuCategoria :: IO ()
 menuCategoria = do
@@ -99,12 +102,19 @@ eliminarCategoriaMenu = do
 
 mostrarCategorias :: [Categoria] -> IO ()
 mostrarCategorias [] = err "No hay categorias registradas."
-mostrarCategorias cs = mapM_ mostrarCategoria cs
+mostrarCategorias cs = do
+    putStrLn $ "  " ++ encabezado
+    putStrLn $ "  " ++ separador
+    mapM_ mostrarCategoria cs
+    putStrLn $ "  " ++ separador
+  where
+    encabezado = padR 8 "ID" ++ "│ " ++ padR 30 "Categoria"
+    separador = replicate (length encabezado) '─'
 
 mostrarCategoria :: Categoria -> IO ()
 mostrarCategoria cat =
-    putStrLn $ "  │  ID: " ++ show (idCategoria cat)
-            ++ "  │  Nombre: " ++ nombreCategoria cat
+    putStrLn $ "  " ++ padR 8 (show (idCategoria cat))
+            ++ "│ " ++ padR 30 (filter (/= '\r') (nombreCategoria cat))
 
 pedirIdCategoria :: IO Int
 pedirIdCategoria = do

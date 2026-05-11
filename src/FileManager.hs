@@ -43,13 +43,31 @@ cargarCategorias = do
     let lineasNoVacias = filter (not . null) lineas
     let categoriasParseadas = [c | Just c <- map lineaACategoria lineasNoVacias]
     if length categoriasParseadas == length lineasNoVacias
-        then return categoriasParseadas
+        then do
+            let categoriasLimpias = map limpiarCategoria categoriasParseadas
+            if categoriasLimpias == categoriasParseadas
+                then return categoriasLimpias
+                else do
+                    guardarCategorias categoriasLimpias
+                    return categoriasLimpias
         else do
             -- Compatibilidad: formato viejo (1 nombre por línea, IDs auto-asignados).
-            -- Importante: este formato no preserva IDs al eliminar/reordenar categorías.
-            let categoriasConId = zip [1..] lineasNoVacias
-            return [Categoria idCat nombre | (idCat, nombre) <- categoriasConId]
+            -- Se migra inmediatamente al formato con Show/Read para que esos IDs
+            -- queden persistidos y no se vuelvan a correr al eliminar una categoría.
+            let categoriasMigradas =
+                    [ Categoria idCat (limpiarNombre nombre)
+                    | (idCat, nombre) <- zip [1..] lineasNoVacias
+                    ]
+            guardarCategorias categoriasMigradas
+            return categoriasMigradas
   where
+    limpiarCategoria :: Categoria -> Categoria
+    limpiarCategoria categoria =
+        categoria { nombreCategoria = limpiarNombre (nombreCategoria categoria) }
+
+    limpiarNombre :: String -> String
+    limpiarNombre = filter (/= '\r')
+
     -- Convierte una línea del archivo a una Categoria; si falla el parseo retorna Nothing.
     lineaACategoria :: String -> Maybe Categoria
     lineaACategoria linea =
