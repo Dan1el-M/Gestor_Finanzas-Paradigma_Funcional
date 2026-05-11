@@ -46,26 +46,46 @@ subMenuAgregarRegistroFinanciero :: IO ()
 subMenuAgregarRegistroFinanciero = do
     titulo "Agregar Nuevo Registro Financiero"
     cerrar
+
+    -- Se cargan los registros existentes para calcular el siguiente ID
+    -- y para validar el presupuesto contra lo que ya está registrado.
     existentes <- cargarRegistros
+
+    -- Se solicitan todos los datos del nuevo registro.
+    -- Esta función solo debe pedir datos, no validar presupuesto,
+    -- para evitar que la alerta salga dos veces.
     resultado <- solicitarDatosRegistro existentes (siguienteIdRegistro existentes)
 
     case resultado of
-        Nothing -> err "Operacion cancelada. No se guardo el registro."
+        Nothing ->
+            err "Operacion cancelada. No se guardo el registro."
+
         Just nuevo -> do
             categorias <- cargarCategorias
             presupuestos <- cargarPresupuestos
-            let presupuestosCompletos = asegurarPresupuestosPorDefecto categorias presupuestos
 
+            -- Asegura que todas las categorias tengan un presupuesto asociado,
+            -- aunque sea con valor por defecto.
+            let presupuestosCompletos =
+                    asegurarPresupuestosPorDefecto categorias presupuestos
+
+            -- La validacion de presupuesto se hace una sola vez aqui.
+            -- Aplica para gastos e inversiones.
             continuar <-
-                if excedePresupuestoConNuevoRegistro presupuestosCompletos existentes nuevo
-                    then confirmarExcesoPresupuesto
+                if requiereValidacionPresupuesto nuevo
+                   && excedePresupuestoConNuevoRegistro presupuestosCompletos existentes nuevo
+                    then confirmarExcesoPresupuesto nuevo
                     else return True
 
             if continuar
                 then do
                     let actualizados = agregarRegistro existentes nuevo
+
                     guardarRegistros actualizados
                     ok "Registro agregado y guardado correctamente."
+
+                    -- Después de guardar, se evalúan las reglas estándar.
+                    -- Esto es distinto a la alerta de presupuesto.
                     reglas <- cargarReglas
                     mostrarAlertas (evaluarReglasAlRegistrar reglas existentes nuevo)
                 else
@@ -83,47 +103,28 @@ mostrarAlerta alerta =
     putStrLn $ "  [" ++ nivelAlerta alerta ++ "] " ++ mensajeAlerta alerta
 
 -- Pide confirmación al usuario cuando un gasto excede el presupuesto configurado para su categoría.
-confirmarExcesoPresupuesto :: IO Bool
-confirmarExcesoPresupuesto = do
-    err "ADVERTENCIA: este gasto excede el presupuesto de la categoria."
-    resp <- prompt "Desea continuar de todos modos? (s/n)"
-    let respNorm = map toLower resp
-    return (respNorm == "s" || respNorm == "si" || respNorm == "sí")
-
 solicitarDatosRegistro :: [RegistroFinanciero] -> Int -> IO (Maybe RegistroFinanciero)
-solicitarDatosRegistro existentes idNuevo = do
+solicitarDatosRegistro _ idNuevo = do
     tipo  <- pedirTipo
     monto <- pedirMonto
     idCat <- pedirIdCategoria
 
-    -- Warning temprano: con monto + categoria ya se puede validar (solo para Gasto).
-    continuar <-
-        case tipo of
-            Gasto -> do
-                categorias <- cargarCategorias
-                presupuestos <- cargarPresupuestos
-                let presupuestosCompletos = asegurarPresupuestosPorDefecto categorias presupuestos
-                if excedePresupuestoConNuevoMonto presupuestosCompletos existentes idCat monto
-                    then confirmarExcesoPresupuesto
-                    else return True
-            _ -> return True
+    -- Esta funcion solo pide datos.
+    -- La validacion de presupuesto se hace despues, en subMenuAgregarRegistroFinanciero,
+    -- cuando ya existe el RegistroFinanciero completo.
+    fecha <- pedirFecha
+    desc <- prompt "Descripcion"
+    etiquetas <- pedirEtiquetas
 
-    if not continuar
-        then return Nothing
-        else do
-            fecha <- pedirFecha
-            desc <- prompt "Descripcion"
-            etiquetas <- pedirEtiquetas
-
-            return $ Just RegistroFinanciero
-                { idRegistro          = idNuevo
-                , tipoRegistro        = tipo
-                , montoRegistro       = monto
-                , idCategoriaRegistro = idCat
-                , fechaRegistro       = fecha
-                , descripcionRegistro = desc
-                , etiquetasRegistro   = etiquetas
-                }
+    return $ Just RegistroFinanciero
+        { idRegistro          = idNuevo
+        , tipoRegistro        = tipo
+        , montoRegistro       = monto
+        , idCategoriaRegistro = idCat
+        , fechaRegistro       = fecha
+        , descripcionRegistro = desc
+        , etiquetasRegistro   = etiquetas
+        }
 
 pedirMonto :: IO Double
 pedirMonto = do
@@ -160,6 +161,28 @@ pedirEtiquetas = do
 siguienteIdRegistro :: [RegistroFinanciero] -> Int
 siguienteIdRegistro [] = 1
 siguienteIdRegistro rs = maximum (map idRegistro rs) + 1
+
+
+-- Define qué tipos de registro deben validarse contra presupuesto.
+-- Por ahora se valida Gasto e Inversion porque ambos representan salidas
+-- o compromisos financieros que pueden exceder un monto planificado.
+requiereValidacionPresupuesto :: RegistroFinanciero -> Bool
+requiereValidacionPresupuesto registro =
+    case tipoRegistro registro of
+        Gasto     -> True
+        Inversion -> True
+        _         -> False
+
+confirmarExcesoPresupuesto :: RegistroFinanciero -> IO Bool
+confirmarExcesoPresupuesto registro = do
+    err $ "ADVERTENCIA: este registro de tipo "
+        ++ show (tipoRegistro registro)
+        ++ " excede el presupuesto de la categoria."
+
+    resp <- prompt "Desea continuar de todos modos? (s/n)"
+    let respNorm = map toLower resp
+
+    return (respNorm == "s" || respNorm == "si" || respNorm == "sí")
 
 -- ─── Tabla de registros ────────────────────────────────────
 
