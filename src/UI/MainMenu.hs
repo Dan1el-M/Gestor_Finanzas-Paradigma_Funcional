@@ -5,6 +5,7 @@ import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
 import UI.FinanceAnalysisMenu (menuAnalisisFinanciero)
 import UI.UIHelpers (titulo, cerrar, ok, err)
+import UI.SimulationMenu (menuSimulacion)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
@@ -38,7 +39,7 @@ ejecutarOpcion opcion =
         "2" -> ok "Modulo de presupuestos pendiente." >> menuPrincipal
         "3" -> ok "Modulo de reglas pendiente." >> menuPrincipal
         "4" -> menuAnalisisFinanciero >> menuPrincipal
-        "5" -> ok "Modulo de simulacion pendiente." >> menuPrincipal
+        "5" -> menuSimulacion >> menuPrincipal
         "6" -> menuReportes >> menuPrincipal
         "7" -> do
             putStrLn ""

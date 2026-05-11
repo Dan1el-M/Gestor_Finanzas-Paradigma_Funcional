@@ -33,12 +33,14 @@ executable finanzas-haskell
         UI.CategoryMenu
         UI.FinanceAnalysisMenu
         UI.FinanceRegistryMenu
+        UI.SimulationMenu
         UI.UIHelpers
         UI.ReportMenu
         -- Services
         Services.FinanceRegistryService
         Services.DateService
         Services.CategoryService
+        Services.SimulationService
         Services.FinanceAnalysisService
         Services.ReportService
 
