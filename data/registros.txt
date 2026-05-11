@@ -1,3 +1,6 @@
+RegistroFinanciero {idRegistro = 7, tipoRegistro = Gasto, montoRegistro = 2000.0, idCategoriaRegistro = 1, fechaRegistro = 2026-01-31, descripcionRegistro = "Pescado", etiquetasRegistro = ["variable"]}
+RegistroFinanciero {idRegistro = 6, tipoRegistro = Gasto, montoRegistro = 500.0, idCategoriaRegistro = 3, fechaRegistro = 2026-02-25, descripcionRegistro = "Mensualidad", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 5, tipoRegistro = Gasto, montoRegistro = 3000.0, idCategoriaRegistro = 1, fechaRegistro = 2026-02-26, descripcionRegistro = "Pollo", etiquetasRegistro = ["fijo"]}
 RegistroFinanciero {idRegistro = 4, tipoRegistro = Gasto, montoRegistro = 1231.0, idCategoriaRegistro = 4, fechaRegistro = 2024-02-29, descripcionRegistro = "DESCMM", etiquetasRegistro = []}
 RegistroFinanciero {idRegistro = 3, tipoRegistro = Ahorro, montoRegistro = 123.0, idCategoriaRegistro = 2, fechaRegistro = 2024-02-29, descripcionRegistro = "DESC2", etiquetasRegistro = ["fijo"]}
 RegistroFinanciero {idRegistro = 1, tipoRegistro = Gasto, montoRegistro = 12.0, idCategoriaRegistro = 1, fechaRegistro = 2026-02-27, descripcionRegistro = "ASC", etiquetasRegistro = ["fijo"]}

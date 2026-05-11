@@ -31,11 +31,13 @@ executable finanzas-haskell
         -- UI
         UI.MainMenu
         UI.CategoryMenu
+        UI.FinanceAnalysisMenu
         UI.FinanceRegistryMenu
         -- Services
         Services.FinanceRegistryService
         Services.DateService
         Services.CategoryService
+        Services.FinanceAnalysisService
 
     -- Dependencias base.
     -- base: funciones principales de Haskell.

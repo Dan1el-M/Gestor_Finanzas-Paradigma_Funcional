@@ -2,6 +2,7 @@ module UI.MainMenu where
 
 import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
+import UI.FinanceAnalysisMenu (menuAnalisisFinanciero)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
@@ -18,7 +19,7 @@ menuPrincipal = do
     putStrLn "1. Gestionar registros financieros"
     putStrLn "2. Gestionar presupuestos"
     putStrLn "3. Evaluar reglas y alertas"
-    putStrLn "4. Ver analisis financiero"
+    putStrLn "4. Analisis financiero avanzado"
     putStrLn "5. Simular escenario financiero"
     putStrLn "6. Generar reportes"
     putStrLn "7. Salir"
@@ -44,7 +45,7 @@ ejecutarOpcion opcion =
             menuPrincipal
 
         "4" -> do
-            putStrLn "Modulo de analisis pendiente."
+            menuAnalisisFinanciero
             menuPrincipal
 
         "5" -> do
