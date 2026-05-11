@@ -1,2 +1,14 @@
-RegistroFinanciero {idRegistro = 4, tipoRegistro = Inversion, montoRegistro = 300.0, idCategoriaRegistro = 1, fechaRegistro = 2028-12-29, descripcionRegistro = "DescN3", etiquetasRegistro = ["variable"]}
-RegistroFinanciero {idRegistro = 3, tipoRegistro = Ahorro, montoRegistro = 1200.0, idCategoriaRegistro = 9, fechaRegistro = 2026-12-31, descripcionRegistro = "DescV1", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 14, tipoRegistro = Gasto, montoRegistro = 100.0, idCategoriaRegistro = 9, fechaRegistro = 2026-03-01, descripcionRegistro = "1", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 13, tipoRegistro = Gasto, montoRegistro = 3000.0, idCategoriaRegistro = 1, fechaRegistro = 2026-11-01, descripcionRegistro = "desc5", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 12, tipoRegistro = Ahorro, montoRegistro = 2424.0, idCategoriaRegistro = 2, fechaRegistro = 2026-01-01, descripcionRegistro = "desc", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 11, tipoRegistro = Inversion, montoRegistro = 12333.0, idCategoriaRegistro = 2, fechaRegistro = 2025-01-01, descripcionRegistro = "des111", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 10, tipoRegistro = Gasto, montoRegistro = 500.0, idCategoriaRegistro = 1, fechaRegistro = 2026-01-01, descripcionRegistro = "desc", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 9, tipoRegistro = Ingreso, montoRegistro = 100000.0, idCategoriaRegistro = 1, fechaRegistro = 2026-11-01, descripcionRegistro = "342", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 8, tipoRegistro = Inversion, montoRegistro = 500.0, idCategoriaRegistro = 1, fechaRegistro = 2026-12-01, descripcionRegistro = "des", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 7, tipoRegistro = Inversion, montoRegistro = 75000.0, idCategoriaRegistro = 2, fechaRegistro = 2026-12-01, descripcionRegistro = "desc", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 6, tipoRegistro = Ahorro, montoRegistro = 200000.0, idCategoriaRegistro = 4, fechaRegistro = 2026-12-01, descripcionRegistro = "23", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 5, tipoRegistro = Ahorro, montoRegistro = 2424.0, idCategoriaRegistro = 6, fechaRegistro = 2026-12-01, descripcionRegistro = "de", etiquetasRegistro = ["variable"]}
+RegistroFinanciero {idRegistro = 4, tipoRegistro = Ingreso, montoRegistro = 12000.0, idCategoriaRegistro = 1, fechaRegistro = 2026-12-04, descripcionRegistro = "DES", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 3, tipoRegistro = Gasto, montoRegistro = 4000.0, idCategoriaRegistro = 5, fechaRegistro = 2026-12-01, descripcionRegistro = "DESC", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 2, tipoRegistro = Ingreso, montoRegistro = 1000.0, idCategoriaRegistro = 1, fechaRegistro = 2026-12-30, descripcionRegistro = "Desc2", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 1, tipoRegistro = Ingreso, montoRegistro = 1.0, idCategoriaRegistro = 1, fechaRegistro = 2026-01-23, descripcionRegistro = "des", etiquetasRegistro = ["fijo"]}

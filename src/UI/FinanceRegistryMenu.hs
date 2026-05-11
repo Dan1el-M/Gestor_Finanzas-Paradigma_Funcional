@@ -4,9 +4,10 @@ import System.IO (hFlush, stdout)
 import Models
 import Services.FinanceRegistryService
 import Services.DateService
-import UI.CategoryMenu (menuCategoria, pedirIdCategoria)
+import UI.CategoryMenu (menuCategoria, pedirIdCategoria, mostrarCategorias)
 import Utils (splitOn)
 import Text.Read (readMaybe)
+import FileManager (cargarCategorias)
 import UI.UIHelpers (titulo, cerrar, ok, err, padR)
 
 -- ─── Menu principal ────────────────────────────────────────
@@ -114,8 +115,6 @@ siguienteIdRegistro [] = 1
 siguienteIdRegistro rs = maximum (map idRegistro rs) + 1
 
 -- ─── Tabla de registros ────────────────────────────────────
-
--- Invierte para mostrar del más antiguo al más nuevo
 mostrarTablaRegistros :: [RegistroFinanciero] -> IO ()
 mostrarTablaRegistros [] = do
     titulo "Registros Financieros"
@@ -124,30 +123,35 @@ mostrarTablaRegistros [] = do
 mostrarTablaRegistros rs = do
     titulo "Registros Financieros"
     cerrar
+    categorias <- cargarCategorias
     putStrLn $ "  " ++ encabezado
     putStrLn $ "  " ++ separador
-    mapM_ (\(n, r) -> putStrLn $ "  " ++ filaConNumero n r) (zip [1 :: Int ..] (reverse rs))
+    mapM_ (\(n, r) -> putStrLn $ "  " ++ filaConNumero categorias n r) (zip [1 :: Int ..] (reverse rs))
     putStrLn $ "  " ++ separador
     putStrLn $ "  Total registros: " ++ show (length rs)
   where
-    encabezado = padR 4 "N°"
-              ++ "│ " ++ padR 4  "ID"
+    encabezado = padR 5 "N"
+              ++ "│ " ++ padR 6  "ID"
               ++ "│ " ++ padR 11 "Tipo"
               ++ "│ " ++ padR 10 "Monto"
-              ++ "│ " ++ padR 5  "Cat"
               ++ "│ " ++ padR 12 "Fecha"
               ++ "│ " ++ padR 15 "Descripcion"
-    separador  = replicate (length encabezado) '─'
+              ++ "│ " ++ padR 20  "Categoria"
+    separador  = replicate (length encabezado) '-'
 
-filaConNumero :: Int -> RegistroFinanciero -> String
-filaConNumero n r =
-    padR 4 (show n)
-    ++ "│ " ++ padR 4  (show (idRegistro r))
+filaConNumero :: [Categoria] -> Int -> RegistroFinanciero -> String
+filaConNumero categorias n r =
+    padR 5 (show n)
+    ++ "│ " ++ padR 6  (show (idRegistro r))
     ++ "│ " ++ padR 11 (show (tipoRegistro r))
     ++ "│ " ++ padR 10 (show (montoRegistro r))
-    ++ "│ " ++ padR 5  (show (idCategoriaRegistro r))
     ++ "│ " ++ padR 12 (show (fechaRegistro r))
     ++ "│ " ++ padR 15 (descripcionRegistro r)
+    ++ "| " ++ padR 20 (show nombreCat)    -- ← show para ver exactamente que contiene
+  where
+    nombreCat = case filter (\c -> idCategoria c == idCategoriaRegistro r) categorias of
+        (c:_) -> filter (/= '\r') (nombreCategoria c)
+        []    -> "Sin categoria"
 
 -- ─── Editar ────────────────────────────────────────────────
 

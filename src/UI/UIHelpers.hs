@@ -32,3 +32,7 @@ err msg = putStrLn $ "  ✗ " ++ msg
 -- Rellena con espacios a la derecha hasta el ancho dado
 padR :: Int -> String -> String
 padR n s = take n (s ++ repeat ' ')
+
+
+mostrarMonto :: Double -> String
+mostrarMonto m = "₡" ++ show m

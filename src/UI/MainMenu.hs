@@ -1,5 +1,6 @@
 module UI.MainMenu where
 
+import UI.ReportMenu (menuReportes)
 import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
 import UI.UIHelpers (titulo, cerrar, ok, err)
@@ -37,7 +38,7 @@ ejecutarOpcion opcion =
         "3" -> ok "Modulo de reglas pendiente." >> menuPrincipal
         "4" -> ok "Modulo de analisis pendiente." >> menuPrincipal
         "5" -> ok "Modulo de simulacion pendiente." >> menuPrincipal
-        "6" -> ok "Modulo de reportes pendiente." >> menuPrincipal
+        "6" -> menuReportes >> menuPrincipal
         "7" -> do
             putStrLn ""
             putStrLn "  ╔══════════════════════════════════════════════════╗"
