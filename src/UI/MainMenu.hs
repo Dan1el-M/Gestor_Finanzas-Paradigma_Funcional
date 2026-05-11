@@ -6,6 +6,7 @@ import UI.FinanceRegistryMenu (menuRegistroFinanciero)
 import UI.FinanceAnalysisMenu (menuAnalisisFinanciero)
 import UI.UIHelpers (titulo, cerrar, ok, err)
 import UI.SimulationMenu (menuSimulacion)
+import UI.BudgetMenu (menuPresupuestos)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
@@ -33,10 +34,11 @@ menuPrincipal = do
     ejecutarOpcion opcion
 
 ejecutarOpcion :: String -> IO ()
+-- Ejecuta la opción elegida del menú principal y regresa al menú cuando corresponde.
 ejecutarOpcion opcion =
     case opcion of
         "1" -> menuRegistroFinanciero >> menuPrincipal
-        "2" -> ok "Modulo de presupuestos pendiente." >> menuPrincipal
+        "2" -> menuPresupuestos >> menuPrincipal
         "3" -> ok "Modulo de reglas pendiente." >> menuPrincipal
         "4" -> menuAnalisisFinanciero >> menuPrincipal
         "5" -> menuSimulacion >> menuPrincipal

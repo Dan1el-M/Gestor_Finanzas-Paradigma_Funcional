@@ -1,0 +1,9 @@
+Presupuesto {idPresupuesto = 1, idCategoriaPresupuesto = 1, montoPresupuesto = 1000.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 2, idCategoriaPresupuesto = 2, montoPresupuesto = 3000.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 3, idCategoriaPresupuesto = 3, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 4, idCategoriaPresupuesto = 4, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 5, idCategoriaPresupuesto = 5, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 6, idCategoriaPresupuesto = 6, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 7, idCategoriaPresupuesto = 7, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 8, idCategoriaPresupuesto = 8, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 9, idCategoriaPresupuesto = 9, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}

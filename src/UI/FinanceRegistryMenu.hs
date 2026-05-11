@@ -1,7 +1,10 @@
 module UI.FinanceRegistryMenu where
 
+import Data.Char (toLower)
 import System.IO (hFlush, stdout)
 import Models
+import FileManager (cargarCategorias, cargarPresupuestos)
+import Services.BudgetService (asegurarPresupuestosPorDefecto, excedePresupuestoConNuevoRegistro)
 import Services.FinanceRegistryService
 import Services.DateService
 import UI.CategoryMenu (menuCategoria, pedirIdCategoria, mostrarCategorias)
@@ -44,14 +47,39 @@ ejecutarOpcion opcion =
 -- ─── Agregar ───────────────────────────────────────────────
 
 subMenuAgregarRegistroFinanciero :: IO ()
+-- Solicita datos de un registro nuevo y lo guarda; si es un Gasto que excede el presupuesto, pide confirmación.
 subMenuAgregarRegistroFinanciero = do
     titulo "Agregar Nuevo Registro Financiero"
     cerrar
     existentes <- cargarRegistros
     nuevo <- solicitarDatosRegistro (siguienteIdRegistro existentes)
-    let actualizados = agregarRegistro existentes nuevo
-    guardarRegistros actualizados
-    ok "Registro agregado y guardado correctamente."
+
+    categorias <- cargarCategorias
+    presupuestos <- cargarPresupuestos
+    let presupuestosCompletos = asegurarPresupuestosPorDefecto categorias presupuestos
+
+    continuar <-
+        if excedePresupuestoConNuevoRegistro presupuestosCompletos existentes nuevo
+            then confirmarExcesoPresupuesto
+            else return True
+
+    if continuar
+        then do
+            let actualizados = agregarRegistro existentes nuevo
+            guardarRegistros actualizados
+            putStrLn "Registro agregado y guardado correctamente."
+        else
+            putStrLn "Operacion cancelada. No se guardo el registro."
+
+-- Pide confirmación al usuario cuando un gasto excede el presupuesto configurado para su categoría.
+confirmarExcesoPresupuesto :: IO Bool
+confirmarExcesoPresupuesto = do
+    putStrLn "ADVERTENCIA: este gasto excede el presupuesto de la categoria."
+    putStr "Desea continuar de todos modos? (s/n): "
+    hFlush stdout
+    resp <- getLine
+    let respNorm = map toLower resp
+    return (respNorm == "s" || respNorm == "si" || respNorm == "sí")
 
 solicitarDatosRegistro :: Int -> IO RegistroFinanciero
 solicitarDatosRegistro idNuevo = do
