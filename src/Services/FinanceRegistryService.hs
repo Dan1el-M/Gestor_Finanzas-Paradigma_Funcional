@@ -2,6 +2,7 @@ module Services.FinanceRegistryService where
 
 import Models
 import FileManager  -- aquí ya están rutaRegistros, leerLineasArchivo, guardarLineasArchivo
+import Data.Time (toGregorian)
 
 -- ─── Lógica pura ───────────────────────────────────────────
 
@@ -20,6 +21,14 @@ filtrarPorEtiqueta etiqueta = filter (\r -> etiqueta `elem` etiquetasRegistro r)
 
 totalRegistros :: [RegistroFinanciero] -> Double
 totalRegistros = foldr (\r acc -> montoRegistro r + acc) 0.0
+
+filtrarPorMes :: Integer -> Int -> [RegistroFinanciero] -> [RegistroFinanciero]
+filtrarPorMes anio mes =
+    filter esDelMes
+  where
+    esDelMes registro =
+        let (a, m, _) = toGregorian (fechaRegistro registro)
+        in a == anio && m == mes
 
 -- ─── Serialización ─────────────────────────────────────────
 
