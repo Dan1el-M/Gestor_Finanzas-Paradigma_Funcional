@@ -50,7 +50,7 @@ ejecutarOpcionAnalisis opcion =
 
 pedirMesAnio :: IO (Int, Int)
 pedirMesAnio = do
-    putStr "Ingrese el anio (ej: 2026): "
+    putStr "Ingrese el año (ej: 2026): "
     hFlush stdout
     anioStr <- getLine
     putStr "Ingrese el mes (1-12): "
@@ -97,7 +97,7 @@ subMenuTendenciasGasto = do
     putStrLn "===================================="
     putStrLn "       Tendencias de Gasto"
     putStrLn "===================================="
-    putStr "Ingrese el anio (ej: 2026): "
+    putStr "Ingrese el año (ej: 2026): "
     hFlush stdout
     anioStr <- getLine
     putStr "Ingrese el mes (1-12): "
@@ -220,7 +220,7 @@ subMenuCategoriasImpacto = do
     putStrLn "===================================="
     putStrLn ""
     putStrLn "Seleccione una opcion:"
-    putStrLn "1. Filtro por anio"
+    putStrLn "1. Filtro por año"
     putStrLn "2. Filtro por mes"
     putStrLn "3. Volver"
     putStr "Opcion: "
@@ -237,9 +237,9 @@ subMenuCategoriasImpacto = do
 subMenuImpactoPorAnio :: IO ()
 subMenuImpactoPorAnio = do
     putStrLn "===================================="
-    putStrLn "  Ranking por Anio"
+    putStrLn "  Ranking por año"
     putStrLn "===================================="
-    putStr "Ingrese el anio (ej: 2026): "
+    putStr "Ingrese el año (ej: 2026): "
     hFlush stdout
     anioStr <- getLine
     case reads anioStr of
@@ -248,10 +248,10 @@ subMenuImpactoPorAnio = do
             categorias <- cargarCategorias
             let ranking = rankingCategoriasPorAnio a registros
             putStrLn ""
-            putStrLn $ "  Anio: " ++ show a
+            putStrLn $ "  Año: " ++ show a
             imprimirRanking categorias ranking
         _ -> do
-            putStrLn "Anio invalido. Intente nuevamente."
+            putStrLn "Año invalido. Intente nuevamente."
             subMenuImpactoPorAnio
 
 subMenuImpactoPorMes :: IO ()
@@ -259,7 +259,7 @@ subMenuImpactoPorMes = do
     putStrLn "===================================="
     putStrLn "  Ranking por Mes"
     putStrLn "===================================="
-    putStr "Ingrese el anio (ej: 2026): "
+    putStr "Ingrese el año (ej: 2026): "
     hFlush stdout
     anioStr <- getLine
     putStr "Ingrese el mes (1-12): "
