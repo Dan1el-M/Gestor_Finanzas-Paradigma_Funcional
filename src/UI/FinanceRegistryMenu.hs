@@ -3,14 +3,14 @@ module UI.FinanceRegistryMenu where
 import Data.Char (toLower)
 import System.IO (hFlush, stdout)
 import Models
-import FileManager (cargarCategorias, cargarPresupuestos)
+import FileManager (cargarCategorias, cargarPresupuestos, cargarReglas)
 import Services.BudgetService (asegurarPresupuestosPorDefecto, excedePresupuestoConNuevoRegistro)
 import Services.FinanceRegistryService
+import Services.RuleService (evaluarReglasAlRegistrar)
 import Services.DateService
-import UI.CategoryMenu (menuCategoria, pedirIdCategoria, mostrarCategorias)
+import UI.CategoryMenu (menuCategoria, pedirIdCategoria)
 import Utils (splitOn)
 import Text.Read (readMaybe)
-import FileManager (cargarCategorias)
 import UI.UIHelpers (titulo, cerrar, ok, err, padR)
 
 -- ─── Menu principal ────────────────────────────────────────
@@ -67,9 +67,22 @@ subMenuAgregarRegistroFinanciero = do
         then do
             let actualizados = agregarRegistro existentes nuevo
             guardarRegistros actualizados
-            putStrLn "Registro agregado y guardado correctamente."
+            ok "Registro agregado y guardado correctamente."
+            reglas <- cargarReglas
+            mostrarAlertas (evaluarReglasAlRegistrar reglas existentes nuevo)
         else
             putStrLn "Operacion cancelada. No se guardo el registro."
+
+mostrarAlertas :: [Alerta] -> IO ()
+mostrarAlertas [] = return ()
+mostrarAlertas alertas = do
+    putStrLn ""
+    putStrLn "Alertas generadas por reglas:"
+    mapM_ mostrarAlerta alertas
+
+mostrarAlerta :: Alerta -> IO ()
+mostrarAlerta alerta =
+    putStrLn $ "  [" ++ nivelAlerta alerta ++ "] " ++ mensajeAlerta alerta
 
 -- Pide confirmación al usuario cuando un gasto excede el presupuesto configurado para su categoría.
 confirmarExcesoPresupuesto :: IO Bool

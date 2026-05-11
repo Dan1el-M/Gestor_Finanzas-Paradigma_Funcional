@@ -1,0 +1,2 @@
+ConfiguracionRegla {nombreRegla = "Gasto por categoria", idCategoriaRegla = 3, montoRegla = 20000.0, tipoPresupuestoRegla = LimiteMaximo}
+ConfiguracionRegla {nombreRegla = "Ahorro minimo", idCategoriaRegla = 0, montoRegla = 5000.0, tipoPresupuestoRegla = MetaMinima}

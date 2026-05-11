@@ -21,12 +21,6 @@ executable finanzas-haskell
     other-modules:
         Models
         Utils
-        FinanceManager
-        BudgetManager
-        Rules
-        Analysis
-        Simulations
-        Reports
         FileManager
         -- UI
         UI.MainMenu
@@ -37,6 +31,7 @@ executable finanzas-haskell
         UI.UIHelpers
         UI.ReportMenu
         UI.BudgetMenu
+        UI.RuleMenu
         -- Services
         Services.FinanceRegistryService
         Services.DateService
@@ -45,6 +40,7 @@ executable finanzas-haskell
         Services.FinanceAnalysisService
         Services.ReportService
         Services.BudgetService
+        Services.RuleService
 
     -- Dependencias base.
     -- base: funciones principales de Haskell.

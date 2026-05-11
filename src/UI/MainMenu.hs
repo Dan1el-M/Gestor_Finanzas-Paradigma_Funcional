@@ -4,9 +4,10 @@ import UI.ReportMenu (menuReportes)
 import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
 import UI.FinanceAnalysisMenu (menuAnalisisFinanciero)
-import UI.UIHelpers (titulo, cerrar, ok, err)
+import UI.UIHelpers (titulo, cerrar, err)
 import UI.SimulationMenu (menuSimulacion)
 import UI.BudgetMenu (menuPresupuestos)
+import UI.RuleMenu (menuReglas)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
@@ -39,7 +40,7 @@ ejecutarOpcion opcion =
     case opcion of
         "1" -> menuRegistroFinanciero >> menuPrincipal
         "2" -> menuPresupuestos >> menuPrincipal
-        "3" -> ok "Modulo de reglas pendiente." >> menuPrincipal
+        "3" -> menuReglas >> menuPrincipal
         "4" -> menuAnalisisFinanciero >> menuPrincipal
         "5" -> menuSimulacion >> menuPrincipal
         "6" -> menuReportes >> menuPrincipal

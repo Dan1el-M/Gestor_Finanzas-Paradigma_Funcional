@@ -1,5 +1,5 @@
-Presupuesto {idPresupuesto = 1, idCategoriaPresupuesto = 1, montoPresupuesto = 1000.0, tipoPresupuesto = LimiteMaximo}
-Presupuesto {idPresupuesto = 2, idCategoriaPresupuesto = 2, montoPresupuesto = 3000.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 1, idCategoriaPresupuesto = 1, montoPresupuesto = 5000.0, tipoPresupuesto = LimiteMaximo}
+Presupuesto {idPresupuesto = 2, idCategoriaPresupuesto = 2, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
 Presupuesto {idPresupuesto = 3, idCategoriaPresupuesto = 3, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
 Presupuesto {idPresupuesto = 4, idCategoriaPresupuesto = 4, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}
 Presupuesto {idPresupuesto = 5, idCategoriaPresupuesto = 5, montoPresupuesto = 0.0, tipoPresupuesto = LimiteMaximo}

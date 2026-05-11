@@ -65,3 +65,21 @@ cargarPresupuestos = do
 guardarPresupuestos :: [Presupuesto] -> IO ()
 guardarPresupuestos presupuestos =
     guardarLineasArchivo rutaPresupuestos (map show presupuestos)
+
+-- Carga la configuración de reglas desde reglas.txt usando Read/Show.
+cargarReglas :: IO [ConfiguracionRegla]
+cargarReglas = do
+    lineas <- leerLineasArchivoSeguro rutaReglas
+    let reglas = [r | Just r <- map lineaARegla lineas]
+    return reglas
+  where
+    lineaARegla :: String -> Maybe ConfiguracionRegla
+    lineaARegla linea =
+        case reads linea of
+            [(r, "")] -> Just r
+            _         -> Nothing
+
+-- Guarda la configuración de reglas en reglas.txt usando Read/Show.
+guardarReglas :: [ConfiguracionRegla] -> IO ()
+guardarReglas reglas =
+    guardarLineasArchivo rutaReglas (map show reglas)
