@@ -1,3 +1,9 @@
+RegistroFinanciero {idRegistro = 28, tipoRegistro = Inversion, montoRegistro = 7000.0, idCategoriaRegistro = 2, fechaRegistro = 2019-09-09, descripcionRegistro = "pipipi6", etiquetasRegistro = ["variable"]}
+RegistroFinanciero {idRegistro = 27, tipoRegistro = Inversion, montoRegistro = 1000.0, idCategoriaRegistro = 2, fechaRegistro = 2019-09-09, descripcionRegistro = "pipipi5", etiquetasRegistro = ["fg"]}
+RegistroFinanciero {idRegistro = 26, tipoRegistro = Gasto, montoRegistro = 1000.0, idCategoriaRegistro = 2, fechaRegistro = 2019-09-09, descripcionRegistro = "pipipi4", etiquetasRegistro = ["fg"]}
+RegistroFinanciero {idRegistro = 25, tipoRegistro = Inversion, montoRegistro = 17000.0, idCategoriaRegistro = 8, fechaRegistro = 2019-09-09, descripcionRegistro = "pipipi3", etiquetasRegistro = ["fijo"]}
+RegistroFinanciero {idRegistro = 24, tipoRegistro = Gasto, montoRegistro = 6000.0, idCategoriaRegistro = 8, fechaRegistro = 2022-02-02, descripcionRegistro = "pipipi2", etiquetasRegistro = ["variavle"]}
+RegistroFinanciero {idRegistro = 23, tipoRegistro = Ahorro, montoRegistro = 20000.0, idCategoriaRegistro = 8, fechaRegistro = 2021-01-01, descripcionRegistro = "p4", etiquetasRegistro = ["pipipi"]}
 RegistroFinanciero {idRegistro = 22, tipoRegistro = Inversion, montoRegistro = 20000.0, idCategoriaRegistro = 9, fechaRegistro = 2020-02-02, descripcionRegistro = "furbol", etiquetasRegistro = ["variable"]}
 RegistroFinanciero {idRegistro = 21, tipoRegistro = Gasto, montoRegistro = 20000.0, idCategoriaRegistro = 4, fechaRegistro = 2026-06-06, descripcionRegistro = "p3", etiquetasRegistro = ["fck"]}
 RegistroFinanciero {idRegistro = 20, tipoRegistro = Gasto, montoRegistro = 9000.0, idCategoriaRegistro = 9, fechaRegistro = 2022-02-02, descripcionRegistro = "p2", etiquetasRegistro = ["fijo"]}
