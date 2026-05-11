@@ -1,0 +1,60 @@
+
+package:         finanzas-haskell-0.1.0.0
+os:              windows
+arch:            x86_64
+compiler:        ghc-9.6.7
+client:          cabal-install-3.14.2.0
+dependencies:
+    base-4.18.3.0
+    deepseq-1.4.8.1
+    time-1.12.2
+
+install-outcome: InstallOk
+docs-outcome:    NotTried
+tests-outcome:   NotTried
+
+
+package:         finanzas-haskell-0.1.0.0
+os:              windows
+arch:            x86_64
+compiler:        ghc-9.6.7
+client:          cabal-install-3.14.2.0
+dependencies:
+    base-4.18.3.0
+    deepseq-1.4.8.1
+    time-1.12.2
+
+install-outcome: InstallOk
+docs-outcome:    NotTried
+tests-outcome:   NotTried
+
+
+package:         finanzas-haskell-0.1.0.0
+os:              windows
+arch:            x86_64
+compiler:        ghc-9.6.7
+client:          cabal-install-3.14.2.0
+dependencies:
+    base-4.18.3.0
+    deepseq-1.4.8.1
+    time-1.12.2
+
+install-outcome: BuildFailed
+docs-outcome:    NotTried
+tests-outcome:   NotTried
+
+
+package:         finanzas-haskell-0.1.0.0
+os:              windows
+arch:            x86_64
+compiler:        ghc-9.6.7
+client:          cabal-install-3.14.2.0
+dependencies:
+    base-4.18.3.0
+    deepseq-1.4.8.1
+    time-1.12.2
+
+install-outcome: InstallOk
+docs-outcome:    NotTried
+tests-outcome:   NotTried
+

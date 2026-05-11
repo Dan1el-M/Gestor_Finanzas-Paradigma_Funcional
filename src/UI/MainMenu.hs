@@ -1,49 +1,46 @@
 module UI.MainMenu where
 
 import UI.ReportMenu (menuReportes)
-import System.IO (hFlush, stdout)
 import UI.FinanceRegistryMenu (menuRegistroFinanciero)
+import UI.BudgetMenu (menuPresupuestos)
 import UI.FinanceAnalysisMenu (menuAnalisisFinanciero)
-import UI.UIHelpers (titulo, cerrar, ok, err)
+import UI.UIHelpers (cerrar, enCaja, err, menuOpciones, opcion, promptOpcion, titulo)
 import UI.SimulationMenu (menuSimulacion)
+import UI.RuleMenu (menuReglas)
 
 iniciarAplicacion :: IO ()
 iniciarAplicacion = do
-    putStrLn ""
-    putStrLn "  ╔══════════════════════════════════════════════════╗"
-    putStrLn "  ║           FinanTrack Haskell                     ║"
-    putStrLn "  ║      Sistema de Finanzas Personales              ║"
-    putStrLn "  ╚══════════════════════════════════════════════════╝"
+    titulo "FinanTrack Haskell"
+    enCaja "Sistema de Finanzas Personales"
+    cerrar
     menuPrincipal
 
 menuPrincipal :: IO ()
 menuPrincipal = do
-    titulo "Menu Principal"
-    putStrLn "  ║  1. Gestionar registros financieros              ║"
-    putStrLn "  ║  2. Gestionar presupuestos                       ║"
-    putStrLn "  ║  3. Evaluar reglas y alertas                     ║"
-    putStrLn "  ║  4. Analisis financiero avanzado                 ║"
-    putStrLn "  ║  5. Simular escenario financiero                 ║"
-    putStrLn "  ║  6. Generar reportes                             ║"
-    putStrLn "  ║  7. Salir                                        ║"
-    cerrar
-    putStr "  Opcion » "
-    hFlush stdout
-    opcion <- getLine
-    ejecutarOpcion opcion
+    menuOpciones "Menu Principal"
+        [ opcion 1 "Gestionar registros financieros"
+        , opcion 2 "Gestionar presupuestos"
+        , opcion 3 "Analisis financiero avanzado"
+        , opcion 4 "Simular escenario financiero"
+        , opcion 5 "Evaluar reglas y alertas"
+        , opcion 6 "Generar reportes"
+        , opcion 7 "Salir"
+        ]
+    seleccion <- promptOpcion
+    ejecutarOpcion seleccion
 
 ejecutarOpcion :: String -> IO ()
-ejecutarOpcion opcion =
-    case opcion of
+-- Ejecuta la opción elegida del menú principal y regresa al menú cuando corresponde.
+ejecutarOpcion seleccion =
+    case seleccion of
         "1" -> menuRegistroFinanciero >> menuPrincipal
-        "2" -> ok "Modulo de presupuestos pendiente." >> menuPrincipal
-        "3" -> ok "Modulo de reglas pendiente." >> menuPrincipal
-        "4" -> menuAnalisisFinanciero >> menuPrincipal
-        "5" -> menuSimulacion >> menuPrincipal
+        "2" -> menuPresupuestos >> menuPrincipal
+        "3" -> menuAnalisisFinanciero >> menuPrincipal
+        "4" -> menuSimulacion >> menuPrincipal
+        "5" -> menuReglas >> menuPrincipal
         "6" -> menuReportes >> menuPrincipal
         "7" -> do
-            putStrLn ""
-            putStrLn "  ╔══════════════════════════════════════════════════╗"
-            putStrLn "  ║         Hasta luego. Fin del programa.           ║"
-            putStrLn "  ╚══════════════════════════════════════════════════╝"
+            titulo "Hasta luego"
+            enCaja "Fin del programa."
+            cerrar
         _   -> err "Opcion invalida." >> menuPrincipal

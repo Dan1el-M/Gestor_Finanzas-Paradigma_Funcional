@@ -1,8 +1,8 @@
 module Services.DateService where
 
-import System.IO (hFlush, stdout)
 import Data.Time (Day, fromGregorian, gregorianMonthLength)
 import Text.Read (readMaybe)
+import UI.UIHelpers (cerrar, err, ok, prompt, titulo)
 
 -- ─── Lógica pura ───────────────────────────────────────────
 
@@ -20,7 +20,7 @@ construirFecha anio mes dia
 
 reintentar :: String -> IO a -> IO a
 reintentar mensaje accion = do
-    putStrLn mensaje
+    err mensaje
     accion
 
 validarRango :: (Ord a) => a -> a -> a -> Bool
@@ -34,10 +34,8 @@ leerNumero = readMaybe <$> getLine
 
 pedirFecha :: IO Day
 pedirFecha = do
-    putStrLn ""
-    putStrLn "  ╔══════════════════════════╗"
-    putStrLn "  ║     Ingresar Fecha       ║"
-    putStrLn "  ╚══════════════════════════╝"
+    titulo "Ingresar Fecha"
+    cerrar
 
     anio <- pedirAnio
     mes  <- pedirMes
@@ -45,23 +43,22 @@ pedirFecha = do
 
     let fecha = fromGregorian anio mes dia
 
-    putStrLn $ "  ✓ Fecha seleccionada: " ++ show fecha
+    ok $ "Fecha seleccionada: " ++ show fecha
     pure fecha
 
 pedirAnio :: IO Integer
 pedirAnio = do
-    putStr "  Año    » "
-    hFlush stdout
-
-    leerNumero >>= maybe
-        (reintentar "  ✗ Debe ingresar un numero entero." pedirAnio)
+    input <- prompt "Año"
+    maybe
+        (reintentar "Debe ingresar un numero entero." pedirAnio)
         validar
+        (readMaybe input)
   where
     validar anio
         | validarRango 1900 2100 anio = pure anio
         | otherwise =
             reintentar
-                "  ✗ Año invalido. Debe ser entre 1900 y 2100."
+                "Año invalido. Debe ser entre 1900 y 2100."
                 pedirAnio
 
 pedirMes :: IO Int
@@ -71,30 +68,26 @@ pedirMes = do
     putStrLn "  May(5)  Jun(6)  Jul(7)  Ago(8)"
     putStrLn "  Sep(9)  Oct(10) Nov(11) Dic(12)"
 
-    putStr "  Mes    » "
-    hFlush stdout
-
-    leerNumero >>= maybe
-        (reintentar "  ✗ Debe ingresar un numero." pedirMes)
+    input <- prompt "Mes"
+    maybe
+        (reintentar "Debe ingresar un numero." pedirMes)
         validar
+        (readMaybe input)
   where
     validar mes
         | validarRango 1 12 mes = pure mes
         | otherwise =
             reintentar
-                "  ✗ Mes invalido. Debe ser entre 1 y 12."
+                "Mes invalido. Debe ser entre 1 y 12."
                 pedirMes
 
 pedirDia :: Integer -> Int -> IO Int
 pedirDia anio mes = do
-    let maxDias = gregorianMonthLength anio mes
-
-    putStr $ "  Dia (1-" ++ show maxDias ++ ") » "
-    hFlush stdout
-
-    leerNumero >>= maybe
-        (reintentar "  ✗ Debe ingresar un numero." (pedirDia anio mes))
+    input <- prompt $ "Dia (1-" ++ show maxDias ++ ")"
+    maybe
+        (reintentar "Debe ingresar un numero." (pedirDia anio mes))
         validar
+        (readMaybe input)
   where
     maxDias = gregorianMonthLength anio mes
 
@@ -102,5 +95,5 @@ pedirDia anio mes = do
         | validarRango 1 maxDias dia = pure dia
         | otherwise =
             reintentar
-                ("  ✗ Dia invalido. Este mes tiene " ++ show maxDias ++ " dias.")
+                ("Dia invalido. Este mes tiene " ++ show maxDias ++ " dias.")
                 (pedirDia anio mes)

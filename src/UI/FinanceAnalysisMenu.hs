@@ -1,13 +1,14 @@
 module UI.FinanceAnalysisMenu where
 
-import System.IO (hFlush, stdout)
-import Data.List (intercalate)
-
 import Models
 import Services.FinanceRegistryService  (cargarRegistros)
 import Services.CategoryService         (buscarCategoriaPorId)
 import Services.FinanceAnalysisService
 import FileManager                      (cargarCategorias)
+import UI.UIHelpers
+    ( cerrar, enCaja, err, menuOpciones, mostrarMonto, ok, opcion, padL, padR
+    , prompt, promptOpcion, separador, titulo
+    )
 
 -- ════════════════════════════════════════════════════════════
 --  MENÚ PRINCIPAL DE ANÁLISIS
@@ -15,34 +16,26 @@ import FileManager                      (cargarCategorias)
 
 menuAnalisisFinanciero :: IO ()
 menuAnalisisFinanciero = do
-    putStrLn "===================================="
-    putStrLn "      Analisis Financiero"
-    putStrLn "===================================="
-    putStrLn ""
-    putStrLn "Seleccione una opcion:"
-    putStrLn "1. Flujo de caja mensual"
-    putStrLn "2. Tendencias de gasto"
-    putStrLn "3. Proyeccion de gastos basada en datos historicos"
-    putStrLn "4. Identificacion de categorias con mayor impacto financiero"
-    putStrLn "5. Volver al menu principal"
-    putStr "Opcion: "
-    hFlush stdout
-
-    opcion <- getLine
-    ejecutarOpcionAnalisis opcion
+    menuOpciones "Analisis Financiero"
+        [ opcion 1 "Flujo de caja mensual"
+        , opcion 2 "Tendencias de gasto"
+        , opcion 3 "Proyeccion de gastos historicos"
+        , opcion 4 "Categorias con mayor impacto financiero"
+        , opcion 5 "Volver al menu principal"
+        ]
+    seleccion <- promptOpcion
+    ejecutarOpcionAnalisis seleccion
 
 
 ejecutarOpcionAnalisis :: String -> IO ()
-ejecutarOpcionAnalisis opcion =
-    case opcion of
+ejecutarOpcionAnalisis seleccion =
+    case seleccion of
         "1" -> subMenuFlujoCajaMensual    >> menuAnalisisFinanciero
         "2" -> subMenuTendenciasGasto     >> menuAnalisisFinanciero
         "3" -> subMenuProyeccionGastos    >> menuAnalisisFinanciero
         "4" -> subMenuCategoriasImpacto   >> menuAnalisisFinanciero
-        "5" -> putStrLn "Volviendo al menu principal..."
-        _   -> do
-                   putStrLn "Opcion invalida. Intente nuevamente."
-                   menuAnalisisFinanciero
+        "5" -> ok "Volviendo al menu principal..."
+        _   -> err "Opcion invalida. Intente nuevamente." >> menuAnalisisFinanciero
 
 -- ════════════════════════════════════════════════════════════
 --  UTILIDAD: pedir mes y año al usuario
@@ -50,17 +43,13 @@ ejecutarOpcionAnalisis opcion =
 
 pedirMesAnio :: IO (Int, Int)
 pedirMesAnio = do
-    putStr "Ingrese el año (ej: 2026): "
-    hFlush stdout
-    anioStr <- getLine
-    putStr "Ingrese el mes (1-12): "
-    hFlush stdout
-    mesStr  <- getLine
+    anioStr <- prompt "Ingrese el año (ej: 2026)"
+    mesStr  <- prompt "Ingrese el mes (1-12)"
     case (reads anioStr, reads mesStr) of
         ([(a, "")], [(m, "")]) | m >= 1 && m <= 12 ->
             return (m, a)
         _ -> do
-            putStrLn "Valores invalidos, intente nuevamente."
+            err "Valores invalidos, intente nuevamente."
             pedirMesAnio
 
 -- ════════════════════════════════════════════════════════════
@@ -69,20 +58,19 @@ pedirMesAnio = do
 
 subMenuFlujoCajaMensual :: IO ()
 subMenuFlujoCajaMensual = do
-    putStrLn "===================================="
-    putStrLn "      Flujo de Caja Mensual"
-    putStrLn "===================================="
+    titulo "Flujo de Caja Mensual"
+    cerrar
     (m, a) <- pedirMesAnio
     registros <- cargarRegistros
     let flujo = flujoCajaMensual m a registros
     putStrLn ""
     putStrLn $ "  Periodo              : " ++ show (mes flujo) ++ "/" ++ show (anio flujo)
-    putStrLn   "  ------------------------------------"
+    separador
     putStrLn $ "  (+) Ingresos         : " ++ formatMonto (totalIngresos    flujo)
     putStrLn $ "  (+) Ahorros          : " ++ formatMonto (totalAhorros     flujo)
     putStrLn $ "  (-) Gastos           : " ++ formatMonto (totalGastos      flujo)
     putStrLn $ "  (-) Inversiones      : " ++ formatMonto (totalInversiones flujo)
-    putStrLn   "  ------------------------------------"
+    separador
     let neto' = neto flujo
         signo = if neto' >= 0 then "  SUPERAVIT" else "  DEFICIT  "
     putStrLn $ signo ++ "          : " ++ formatMonto neto'
@@ -94,15 +82,10 @@ subMenuFlujoCajaMensual = do
 
 subMenuTendenciasGasto :: IO ()
 subMenuTendenciasGasto = do
-    putStrLn "===================================="
-    putStrLn "       Tendencias de Gasto"
-    putStrLn "===================================="
-    putStr "Ingrese el año (ej: 2026): "
-    hFlush stdout
-    anioStr <- getLine
-    putStr "Ingrese el mes (1-12): "
-    hFlush stdout
-    mesStr <- getLine
+    titulo "Tendencias de Gasto"
+    cerrar
+    anioStr <- prompt "Ingrese el año (ej: 2026)"
+    mesStr <- prompt "Ingrese el mes (1-12)"
     case (reads anioStr, reads mesStr) of
         ([(a, "")], [(m, "")]) | m >= 1 && m <= 12 -> do
             registros  <- cargarRegistros
@@ -117,7 +100,7 @@ subMenuTendenciasGasto = do
                     mapM_ (imprimirCatFrecuencia categorias) cats
             putStrLn ""
         _ -> do
-            putStrLn "Valores invalidos, intente nuevamente."
+            err "Valores invalidos, intente nuevamente."
             subMenuTendenciasGasto
 
 imprimirCatFrecuencia :: [Categoria] -> Int -> IO ()
@@ -133,32 +116,23 @@ imprimirCatFrecuencia categorias idCat =
 
 subMenuProyeccionGastos :: IO ()
 subMenuProyeccionGastos = do
-    putStrLn "===================================="
-    putStrLn "    Proyeccion de Gastos"
-    putStrLn "===================================="
-    putStrLn ""
-    putStrLn "Seleccione una opcion:"
-    putStrLn "1. Proyeccion gastos totales"
-    putStrLn "2. Proyeccion por categoria"
-    putStrLn "3. Volver"
-    putStr "Opcion: "
-    hFlush stdout
-    opcion <- getLine
-    case opcion of
+    menuOpciones "Proyeccion de Gastos"
+        [ opcion 1 "Proyeccion gastos totales"
+        , opcion 2 "Proyeccion por categoria"
+        , opcion 3 "Volver"
+        ]
+    seleccion <- promptOpcion
+    case seleccion of
         "1" -> subMenuProyeccionTotal      >> subMenuProyeccionGastos
         "2" -> subMenuProyeccionCategoria  >> subMenuProyeccionGastos
         "3" -> return ()
-        _   -> do
-                   putStrLn "Opcion invalida. Intente nuevamente."
-                   subMenuProyeccionGastos
+        _   -> err "Opcion invalida. Intente nuevamente." >> subMenuProyeccionGastos
 
 subMenuProyeccionTotal :: IO ()
 subMenuProyeccionTotal = do
-    putStrLn "===================================="
-    putStrLn "   Proyeccion de Gastos Totales"
-    putStrLn "===================================="
-    putStrLn "  Calcula el promedio mensual historico de todos los gastos."
-    putStrLn ""
+    titulo "Proyeccion de Gastos Totales"
+    enCaja "Promedio mensual historico de todos los gastos."
+    cerrar
     registros <- cargarRegistros
     putStrLn ""
     case proyeccionGastosTotales registros of
@@ -171,26 +145,22 @@ subMenuProyeccionTotal = do
 
 subMenuProyeccionCategoria :: IO ()
 subMenuProyeccionCategoria = do
-    putStrLn "===================================="
-    putStrLn "   Proyeccion por Categoria"
-    putStrLn "===================================="
-    putStrLn "  Calcula el promedio mensual historico de gastos por categoria."
-    putStrLn ""
+    titulo "Proyeccion por Categoria"
+    enCaja "Promedio mensual historico por categoria."
+    cerrar
     categorias <- cargarCategorias
     if null categorias
-    then putStrLn "  No hay categorias registradas."
+    then err "No hay categorias registradas."
     else do
         putStrLn "  Categorias disponibles:"
         mapM_ (\cat -> putStrLn $ "    [" ++ show (idCategoria cat) ++ "] " ++ nombreCategoria cat) categorias
         putStrLn ""
-        putStr "Ingrese el ID de la categoria: "
-        hFlush stdout
-        idStr <- getLine
+        idStr <- prompt "Ingrese el ID de la categoria"
         case reads idStr of
             [(idCat, "")] ->
                 case buscarCategoriaPorId idCat categorias of
                     Nothing -> do
-                        putStrLn "  Categoria no encontrada."
+                        err "Categoria no encontrada."
                         putStrLn ""
                     Just cat -> do
                         registros <- cargarRegistros
@@ -204,7 +174,7 @@ subMenuProyeccionCategoria = do
                                 putStrLn   "  (Total gastos de la categoria / meses distintos con gastos)"
                         putStrLn ""
             _ -> do
-                putStrLn "  ID invalido."
+                err "ID invalido."
                 putStrLn ""
     putStrLn ""
 
@@ -215,33 +185,23 @@ subMenuProyeccionCategoria = do
 
 subMenuCategoriasImpacto :: IO ()
 subMenuCategoriasImpacto = do
-    putStrLn "===================================="
-    putStrLn " Categorias con Mayor Impacto"
-    putStrLn "===================================="
-    putStrLn ""
-    putStrLn "Seleccione una opcion:"
-    putStrLn "1. Filtro por año"
-    putStrLn "2. Filtro por mes"
-    putStrLn "3. Volver"
-    putStr "Opcion: "
-    hFlush stdout
-    opcion <- getLine
-    case opcion of
+    menuOpciones "Categorias con Mayor Impacto"
+        [ opcion 1 "Filtro por año"
+        , opcion 2 "Filtro por mes"
+        , opcion 3 "Volver"
+        ]
+    seleccion <- promptOpcion
+    case seleccion of
         "1" -> subMenuImpactoPorAnio   >> subMenuCategoriasImpacto
         "2" -> subMenuImpactoPorMes    >> subMenuCategoriasImpacto
         "3" -> return ()
-        _   -> do
-                   putStrLn "Opcion invalida. Intente nuevamente."
-                   subMenuCategoriasImpacto
+        _   -> err "Opcion invalida. Intente nuevamente." >> subMenuCategoriasImpacto
 
 subMenuImpactoPorAnio :: IO ()
 subMenuImpactoPorAnio = do
-    putStrLn "===================================="
-    putStrLn "  Ranking por año"
-    putStrLn "===================================="
-    putStr "Ingrese el año (ej: 2026): "
-    hFlush stdout
-    anioStr <- getLine
+    titulo "Ranking por Año"
+    cerrar
+    anioStr <- prompt "Ingrese el año (ej: 2026)"
     case reads anioStr of
         [(a, "")] -> do
             registros  <- cargarRegistros
@@ -251,20 +211,15 @@ subMenuImpactoPorAnio = do
             putStrLn $ "  Año: " ++ show a
             imprimirRanking categorias ranking
         _ -> do
-            putStrLn "Año invalido. Intente nuevamente."
+            err "Año invalido. Intente nuevamente."
             subMenuImpactoPorAnio
 
 subMenuImpactoPorMes :: IO ()
 subMenuImpactoPorMes = do
-    putStrLn "===================================="
-    putStrLn "  Ranking por Mes"
-    putStrLn "===================================="
-    putStr "Ingrese el año (ej: 2026): "
-    hFlush stdout
-    anioStr <- getLine
-    putStr "Ingrese el mes (1-12): "
-    hFlush stdout
-    mesStr <- getLine
+    titulo "Ranking por Mes"
+    cerrar
+    anioStr <- prompt "Ingrese el año (ej: 2026)"
+    mesStr <- prompt "Ingrese el mes (1-12)"
     case (reads anioStr, reads mesStr) of
         ([(a, "")], [(m, "")]) | m >= 1 && m <= 12 -> do
             registros  <- cargarRegistros
@@ -274,7 +229,7 @@ subMenuImpactoPorMes = do
             putStrLn $ "  Periodo: " ++ show m ++ "/" ++ show a
             imprimirRanking categorias ranking
         _ -> do
-            putStrLn "Valores invalidos. Intente nuevamente."
+            err "Valores invalidos. Intente nuevamente."
             subMenuImpactoPorMes
 
 imprimirRanking :: [Categoria] -> [RankingCategoria] -> IO ()
@@ -282,8 +237,11 @@ imprimirRanking categorias ranking = do
     if null ranking
     then putStrLn "  No hay registros de gastos para este periodo."
     else do
-        putStrLn "  Pos  | ID  | Nombre                 | Total Gastado"
-        putStrLn "  -----|-----|------------------------|---------------"
+        putStrLn $ "  " ++ padR 5 "Pos"
+                ++ "│ " ++ padR 5 "ID"
+                ++ "│ " ++ padR 24 "Nombre"
+                ++ "│ " ++ padR 14 "Total"
+        putStrLn $ "  " ++ replicate 54 '─'
         mapM_ (imprimirFilaRanking categorias) (zip [1 :: Int ..] ranking)
     putStrLn ""
 
@@ -293,9 +251,9 @@ imprimirFilaRanking categorias (pos, (idCat, total)) =
                     Just cat -> nombreCategoria cat
                     Nothing  -> "(no encontrada)"
     in  putStrLn $ "  " ++ padLeft 3 (show pos)
-                ++ "  | " ++ padLeft 3 (show idCat)
-                ++ " | " ++ padRight 22 nombre
-                ++ " | " ++ formatMonto total
+                ++ "  │ " ++ padLeft 3 (show idCat)
+                ++ " │ " ++ padRight 24 nombre
+                ++ " │ " ++ formatMonto total
 
 -- ════════════════════════════════════════════════════════════
 --  UTILIDADES DE FORMATO
@@ -303,15 +261,12 @@ imprimirFilaRanking categorias (pos, (idCat, total)) =
 
 -- | Formatea un Double como monto monetario con 2 decimales
 formatMonto :: Double -> String
-formatMonto x =
-    let (entero, dec) = break (== '.') (show (fromIntegral (round (x * 100) :: Int) / 100.0 :: Double))
-        decimales     = take 3 (dec ++ ".00")   -- asegura ".XX"
-    in  entero ++ decimales
+formatMonto = mostrarMonto
 
 -- | Rellena a la izquierda con espacios hasta el ancho dado
 padLeft :: Int -> String -> String
-padLeft n s = replicate (max 0 (n - length s)) ' ' ++ s
+padLeft = padL
 
 -- | Rellena a la derecha con espacios hasta el ancho dado
 padRight :: Int -> String -> String
-padRight n s = s ++ replicate (max 0 (n - length s)) ' '
+padRight = padR
