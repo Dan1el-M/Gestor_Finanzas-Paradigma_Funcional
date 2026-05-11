@@ -2,38 +2,33 @@ module UI.CategoryMenu where
 
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
-
 import FileManager (cargarCategorias)
 import qualified Services.CategoryService as Service
 import Services.FinanceRegistryService (cargarRegistros)
 import Models
+import UI.UIHelpers (titulo, cerrar, ok, err)
 
--- Menu especifico para el CRUD de categorias.
 menuCategoria :: IO ()
 menuCategoria = do
-    putStrLn ""
-    putStrLn "===== Gestion de Categorias ====="
-    putStrLn "1. Crear categoria"
-    putStrLn "2. Listar categorias"
-    putStrLn "3. Buscar categoria por ID"
-    putStrLn "4. Actualizar categoria"
-    putStrLn "5. Eliminar categoria"
-    putStrLn "6. Volver al menu de registros financieros"
-    putStr "Opcion: "
+    titulo "Gestion de Categorias"
+    putStrLn "  ║  1. Crear categoria                              ║"
+    putStrLn "  ║  2. Listar categorias                            ║"
+    putStrLn "  ║  3. Buscar categoria por ID                      ║"
+    putStrLn "  ║  4. Actualizar categoria                         ║"
+    putStrLn "  ║  5. Eliminar categoria                           ║"
+    putStrLn "  ║  6. Volver                                       ║"
+    cerrar
+    putStr "  Opcion » "
     hFlush stdout
-
     opcion <- getLine
-
     case opcion of
-        "1" -> crearCategoriaMenu >> menuCategoria
-        "2" -> listarCategoriasMenu >> menuCategoria
-        "3" -> buscarCategoriaMenu >> menuCategoria
+        "1" -> crearCategoriaMenu    >> menuCategoria
+        "2" -> listarCategoriasMenu  >> menuCategoria
+        "3" -> buscarCategoriaMenu   >> menuCategoria
         "4" -> actualizarCategoriaMenu >> menuCategoria
         "5" -> eliminarCategoriaMenu >> menuCategoria
-        "6" -> putStrLn "Volviendo al menu de registros financieros..."
-        _ -> do
-            putStrLn "Opcion invalida."
-            menuCategoria
+        "6" -> ok "Volviendo..."
+        _   -> err "Opcion invalida." >> menuCategoria
 
 menuCategorias :: IO ()
 menuCategorias = menuCategoria
@@ -41,132 +36,102 @@ menuCategorias = menuCategoria
 cargarCategoriasMenu :: IO [Categoria]
 cargarCategoriasMenu = cargarCategorias
 
--- Lee los datos necesarios para crear una categoria.
 crearCategoriaMenu :: IO ()
 crearCategoriaMenu = do
-    putStr "Nombre de la nueva categoria: "
+    titulo "Crear Categoria"
+    cerrar
+    putStr "  Nombre » "
     hFlush stdout
     nombre <- getLine
-
     categorias <- cargarCategoriasMenu
     resultado <- Service.crearCategoriaService nombre categorias
     case resultado of
-        Left mensaje ->
-            putStrLn mensaje
-        Right _ -> do
-            putStrLn "Categoria creada correctamente."
+        Left mensaje -> err mensaje
+        Right _      -> ok "Categoria creada correctamente."
 
-mostrarTituloYCategorias :: [Categoria] -> IO ()
-mostrarTituloYCategorias categorias = do
-    putStrLn ""
-    putStrLn "Categorias registradas:"
-    mostrarCategorias categorias
-    putStrLn ""
-
--- Muestra todas las categorias registradas.
 listarCategoriasMenu :: IO ()
 listarCategoriasMenu = do
     categorias <- cargarCategoriasMenu
-    mostrarTituloYCategorias categorias
+    titulo "Categorias Registradas"
+    cerrar
+    mostrarCategorias categorias
 
--- Lee un ID y muestra la categoria encontrada.
 buscarCategoriaMenu :: IO ()
 buscarCategoriaMenu = do
+    titulo "Buscar Categoria"
+    cerrar
     categorias <- cargarCategoriasMenu
-    mostrarTituloYCategorias categorias
-    putStr "Ingrese el ID de la categoria: "
+    mostrarCategorias categorias
+    putStr "  ID » "
     hFlush stdout
     textoId <- getLine
-
     case readMaybe textoId :: Maybe Int of
-        Nothing -> putStrLn "ID invalido. Debe ingresar un numero."
+        Nothing -> err "Debe ingresar un numero."
         Just idBuscado ->
             case Service.buscarCategoriaPorId idBuscado categorias of
-                Nothing -> putStrLn "No existe una categoria con ese ID."
-                Just categoria -> mostrarCategoria categoria
+                Nothing   -> err "No existe una categoria con ese ID."
+                Just cat  -> ok ("Encontrada: " ++ nombreCategoria cat)
 
--- Lee los datos necesarios para actualizar una categoria existente.
 actualizarCategoriaMenu :: IO ()
 actualizarCategoriaMenu = do
+    titulo "Actualizar Categoria"
+    cerrar
     categorias <- cargarCategoriasMenu
-    mostrarTituloYCategorias categorias
-    putStr "Ingrese el ID de la categoria a actualizar: "
+    mostrarCategorias categorias
+    putStr "  ID a actualizar » "
     hFlush stdout
     textoId <- getLine
-
     case readMaybe textoId :: Maybe Int of
-        Nothing ->
-            putStrLn "ID invalido. Debe ingresar un numero."
-
+        Nothing -> err "Debe ingresar un numero."
         Just idBuscado -> do
-            putStr "Nuevo nombre de la categoria: "
+            putStr "  Nuevo nombre » "
             hFlush stdout
             nuevoNombre <- getLine
-
             resultado <- Service.actualizarCategoriaService idBuscado nuevoNombre categorias
             case resultado of
-                Left mensaje ->
-                    putStrLn mensaje
+                Left mensaje -> err mensaje
+                Right _      -> ok "Categoria actualizada correctamente."
 
-                Right _ ->
-                    putStrLn "Categoria actualizada correctamente."
-
--- Lee el ID de la categoria que se desea eliminar.
 eliminarCategoriaMenu :: IO ()
 eliminarCategoriaMenu = do
+    titulo "Eliminar Categoria"
+    cerrar
     categorias <- cargarCategoriasMenu
-    mostrarTituloYCategorias categorias
-    putStr "Ingrese el ID de la categoria a eliminar: "
+    mostrarCategorias categorias
+    putStr "  ID a eliminar » "
     hFlush stdout
     textoId <- getLine
-
     case readMaybe textoId :: Maybe Int of
-        Nothing ->
-            putStrLn "ID invalido. Debe ingresar un numero."
-
+        Nothing -> err "Debe ingresar un numero."
         Just idBuscado -> do
             registros <- cargarRegistros
             resultado <- Service.eliminarCategoriaService idBuscado categorias registros
             case resultado of
-                Left mensaje ->
-                    putStrLn mensaje
+                Left mensaje -> err mensaje
+                Right _      -> ok "Categoria eliminada correctamente."
 
-                Right _ ->
-                    putStrLn "Categoria eliminada correctamente."
-
--- Muestra una lista de categorias.
 mostrarCategorias :: [Categoria] -> IO ()
-mostrarCategorias [] = putStrLn "No hay categorias registradas."
-mostrarCategorias categorias = mostrarCategoriasRec categorias
+mostrarCategorias [] = err "No hay categorias registradas."
+mostrarCategorias cs = mapM_ mostrarCategoria cs
 
-mostrarCategoriasRec :: [Categoria] -> IO ()
-mostrarCategoriasRec [] = return ()
-mostrarCategoriasRec (categoria:resto) = do
-    mostrarCategoria categoria
-    mostrarCategoriasRec resto
-
--- Muestra una categoria individual.
 mostrarCategoria :: Categoria -> IO ()
-mostrarCategoria categoria = do
-    putStrLn ("ID: " ++ show (idCategoria categoria)
-        ++ " | Nombre: " ++ nombreCategoria categoria)
+mostrarCategoria cat =
+    putStrLn $ "  │  ID: " ++ show (idCategoria cat)
+            ++ "  │  Nombre: " ++ nombreCategoria cat
 
-
--- Muestra categorias y pide un ID valido
 pedirIdCategoria :: IO Int
 pedirIdCategoria = do
     categorias <- cargarCategoriasMenu
-    mostrarTituloYCategorias categorias
-    putStr "ID de categoria: "
+    titulo "Seleccionar Categoria"
+    cerrar
+    mostrarCategorias categorias
+    putStr "  ID de categoria » "
     hFlush stdout
     textoId <- getLine
     case readMaybe textoId :: Maybe Int of
-        Nothing -> do
-            putStrLn "Debe ingresar un numero."
-            pedirIdCategoria
+        Nothing -> err "Debe ingresar un numero." >> pedirIdCategoria
         Just idCat ->
             case Service.buscarCategoriaPorId idCat categorias of
-                Nothing -> do
-                    putStrLn "No existe una categoria con ese ID. Intente de nuevo."
-                    pedirIdCategoria
-                Just _ -> return idCat
+                Nothing -> err "No existe esa categoria." >> pedirIdCategoria
+                Just _  -> return idCat
+
