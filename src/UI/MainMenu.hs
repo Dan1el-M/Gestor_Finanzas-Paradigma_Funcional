@@ -20,9 +20,9 @@ menuPrincipal = do
     menuOpciones "Menu Principal"
         [ opcion 1 "Gestionar registros financieros"
         , opcion 2 "Gestionar presupuestos"
-        , opcion 3 "Evaluar reglas y alertas"
-        , opcion 4 "Analisis financiero avanzado"
-        , opcion 5 "Simular escenario financiero"
+        , opcion 3 "Analisis financiero avanzado"
+        , opcion 4 "Simular escenario financiero"
+        , opcion 5 "Evaluar reglas y alertas"
         , opcion 6 "Generar reportes"
         , opcion 7 "Salir"
         ]
@@ -35,9 +35,9 @@ ejecutarOpcion seleccion =
     case seleccion of
         "1" -> menuRegistroFinanciero >> menuPrincipal
         "2" -> menuPresupuestos >> menuPrincipal
-        "3" -> menuReglas >> menuPrincipal
-        "4" -> menuAnalisisFinanciero >> menuPrincipal
-        "5" -> menuSimulacion >> menuPrincipal
+        "3" -> menuAnalisisFinanciero >> menuPrincipal
+        "4" -> menuSimulacion >> menuPrincipal
+        "5" -> menuReglas >> menuPrincipal
         "6" -> menuReportes >> menuPrincipal
         "7" -> do
             titulo "Hasta luego"

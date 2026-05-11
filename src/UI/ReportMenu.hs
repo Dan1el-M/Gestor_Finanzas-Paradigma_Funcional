@@ -18,7 +18,7 @@ menuReportes = do
         [ opcion 1 "Resumen mensual"
         , opcion 2 "Comparar dos periodos"
         , opcion 3 "Categorias con mayor gasto"
-        , opcion 4 "Volver"
+        , opcion 4 "Volver al menu principal"
         ]
     seleccion <- promptOpcion
     case seleccion of
