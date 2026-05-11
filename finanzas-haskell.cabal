@@ -1,0 +1,43 @@
+cabal-version:      3.0
+-- Configura cómo se compila y ejecuta el proyecto con Cabal.
+name:               finanzas-haskell
+version:            0.1.0.0
+license:            MIT
+author:             Grupo Proyecto Funcional
+maintainer:         grupo@example.com
+build-type:         Simple
+
+-- Este archivo configura cómo Cabal compila y ejecuta el proyecto.
+-- Aquí se declaran el archivo principal, los módulos internos y las dependencias.
+
+executable finanzas-haskell
+    main-is:          Main.hs
+
+    -- Carpeta donde está el Main.hs
+    hs-source-dirs:   app, src
+
+    -- Módulos internos del proyecto.
+    -- Cada vez que agreguemos un módulo nuevo en src/, debe aparecer aquí.
+    other-modules:
+        Models
+        Utils
+        FinanceManager
+        BudgetManager
+        Rules
+        Analysis
+        Simulations
+        Reports
+        FileManager
+
+    -- Dependencias base.
+    -- base: funciones principales de Haskell.
+    -- time: manejo de fechas con Data.Time.
+    build-depends:
+        base >=4.14 && <5,
+        time >=1.9
+
+    -- Versión del lenguaje Haskell que vamos a usar.
+    default-language: Haskell2010
+
+    -- Opciones útiles para mostrar advertencias al compilar.
+    ghc-options: -Wall
