@@ -28,6 +28,8 @@ executable finanzas-haskell
         Simulations
         Reports
         FileManager
+        UI.MainMenu
+        UI.CategoryMenu
 
     -- Dependencias base.
     -- base: funciones principales de Haskell.

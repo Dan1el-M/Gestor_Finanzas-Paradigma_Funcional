@@ -1,32 +1,23 @@
--- aarchvios main para llamar a los archivo de Ui y de logica de negocio
+module UI.MainMenu where
 
-module Main where
-
+import UI.CategoryMenu (menuCategoria)
 import System.IO (hFlush, stdout)
-
--- Importamos los módulos del proyecto.
--- Aunque algunos todavía tienen funciones básicas,
--- esto deja preparada la estructura para integrar todo.
 import FileManager
-import Reports
+import Reports 
 
--- Punto de entrada del programa.
--- Cuando se ejecuta "cabal run", Cabal inicia desde aquí.
-main :: IO ()
-main = do
+iniciarAplicacion :: IO ()
+iniciarAplicacion = do
     putStrLn "===================================="
     putStrLn "        FinanTrack Haskell"
     putStrLn " Sistema de Finanzas Personales"
     putStrLn "===================================="
     menuPrincipal
 
--- Muestra el menú principal y lee la opción del usuario.
--- Esta función usa IO porque interactúa con la consola.
 menuPrincipal :: IO ()
 menuPrincipal = do
     putStrLn ""
     putStrLn "Seleccione una opcion:"
-    putStrLn "1. Registrar movimiento financiero"
+    putStrLn "1. Ingresar movimiento financiero"
     putStrLn "2. Ver registros financieros"
     putStrLn "3. Gestionar presupuestos"
     putStrLn "4. Evaluar reglas y alertas"
@@ -34,7 +25,8 @@ menuPrincipal = do
     putStrLn "6. Simular escenario financiero"
     putStrLn "7. Generar reportes"
     putStrLn "8. Guardar datos"
-    putStrLn "9. Salir"
+    putStrLn "9. CRUD Categorias"
+    putStrLn "10. Salir"
     putStr "Opcion: "
     hFlush stdout
 
@@ -83,6 +75,9 @@ ejecutarOpcion opcion =
             menuPrincipal
 
         "9" -> do
+            menuCategoria
+
+        "10" -> do
             putStrLn "Saliendo del sistema..."
 
         _ -> do
