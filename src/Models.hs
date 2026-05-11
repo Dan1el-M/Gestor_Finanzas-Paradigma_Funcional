@@ -1,15 +1,20 @@
--- aca van los tipos d edatos del proyecto
-
 module Models where
 
 import Data.Time (Day)
 
 -- Este módulo define los tipos de datos principales del sistema.
--- La idea es que todos los demás módulos usen estas estructuras
+-- La idea es centralizar aquí las estructuras para que todos los módulos
+-- usen los mismos modelos y no creen versiones diferentes.
 
+-- Representa una categoría financiera.
+-- La categoría existe en una lista independiente y los registros financieros
+-- solo guardan el ID de la categoría.
+data Categoria = Categoria
+    { idCategoria :: Int
+    , nombreCategoria :: String
+    } deriving (Show, Read, Eq)
 
--- Representa el tipo de movimiento financiero.
--- Un registro puede ser ingreso, gasto, ahorro o inversión.
+-- Representa el tipo principal de movimiento financiero.
 data TipoRegistro
     = Ingreso
     | Gasto
@@ -17,35 +22,47 @@ data TipoRegistro
     | Inversion
     deriving (Show, Read, Eq)
 
--- Representa un registro financiero completo.
--- Este será el dato principal del sistema.
+-- Representa un registro financiero.
+-- Cada registro pertenece a una categoría mediante idCategoriaRegistro.
+-- Las etiquetas sirven para filtrar detalles como fijo, variable,
+-- planilla, aguinaldo, playa, mensual, etc.
 data RegistroFinanciero = RegistroFinanciero
-    { tipoRegistro :: TipoRegistro
+    { idRegistro :: Int
+    , tipoRegistro :: TipoRegistro
     , montoRegistro :: Double
-    , categoriaRegistro :: String
+    , idCategoriaRegistro :: Int
     , fechaRegistro :: Day
     , descripcionRegistro :: String
     , etiquetasRegistro :: [String]
     } deriving (Show, Read, Eq)
 
--- Representa un presupuesto definido para una categoría.
--- Ejemplo: Alimentacion con límite de 100000 colones.
+-- Indica cómo se interpreta un presupuesto.
+-- LimiteMaximo: se genera alerta si el gasto real supera el monto.
+-- MetaMinima: se genera alerta si lo real no alcanza el monto esperado.
+data TipoPresupuesto
+    = LimiteMaximo
+    | MetaMinima
+    deriving (Show, Read, Eq)
+
+-- Representa un presupuesto asociado a una categoría.
 data Presupuesto = Presupuesto
-    { categoriaPresupuesto :: String
-    , limitePresupuesto :: Double
+    { idPresupuesto :: Int
+    , idCategoriaPresupuesto :: Int
+    , montoPresupuesto :: Double
+    , tipoPresupuesto :: TipoPresupuesto
     } deriving (Show, Read, Eq)
 
--- Representa una regla del sistema.
--- Ejemplo: si Alimentacion supera 100000, mostrar una alerta.
-data Regla = Regla
-    { tipoRegla :: String
-    , categoriaRegla :: String
-    , limiteRegla :: Double
-    , mensajeRegla :: String
+-- Representa una regla configurable.
+-- Las reglas base existen en el código, pero el usuario puede modificar
+-- valores como la categoría evaluada y el monto límite/meta.
+data ConfiguracionRegla = ConfiguracionRegla
+    { nombreRegla :: String
+    , idCategoriaRegla :: Int
+    , montoRegla :: Double
+    , tipoPresupuestoRegla :: TipoPresupuesto
     } deriving (Show, Read, Eq)
 
 -- Representa una alerta generada por el sistema.
--- Las alertas no necesariamente se guardan; pueden generarse al evaluar reglas.
 data Alerta = Alerta
     { mensajeAlerta :: String
     , nivelAlerta :: String

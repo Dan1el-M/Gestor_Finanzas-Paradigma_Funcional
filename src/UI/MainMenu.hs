@@ -28,7 +28,7 @@ menuPrincipal = do
     hFlush stdout
 
     opcion <- getLine
-    ejecutarOpcion opcion
+    ejecutarOpcion opcion categorias registros
 
 ejecutarOpcion :: String -> IO ()
 ejecutarOpcion opcion =
@@ -66,4 +66,4 @@ ejecutarOpcion opcion =
 
         _ -> do
             putStrLn "Opcion invalida. Intente de nuevo."
-            menuPrincipal
+            menuPrincipal categorias registros

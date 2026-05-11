@@ -7,4 +7,3 @@ Servicios
 Salario
 Ahorro
 Inversion
-Otros
