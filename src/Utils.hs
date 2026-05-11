@@ -41,3 +41,11 @@ parseaFecha =
 parsearTags :: String -> [String]
 parsearTags "" = []
 parsearTags text = separaPor ',' text
+
+splitOn :: Char -> String -> [String]
+splitOn _ "" = []
+splitOn delim str =
+    let (word, rest) = break (== delim) str
+    in word : case rest of
+        []     -> []
+        (_:xs) -> splitOn delim xs

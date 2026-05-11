@@ -3,8 +3,9 @@ module UI.FinanceRegistryMenu where
 import System.IO (hFlush, stdout)
 import Models
 import Services.FinanceRegistryService
-import UI.CategoryMenu (menuCategoria)
-import Data.Time (Day, fromGregorian)
+import Services.DateService
+import UI.CategoryMenu (menuCategoria,pedirIdCategoria)
+import Utils (splitOn)
 
 menuRegistroFinanciero :: IO ()
 menuRegistroFinanciero = do
@@ -77,8 +78,7 @@ solicitarDatosRegistro idNuevo = do
     monto <- readLn :: IO Double
 
     putStr "ID de categoria: "
-    hFlush stdout
-    idCat <- readLn :: IO Int
+    idCat <- pedirIdCategoria
 
     fecha <- pedirFecha
 
@@ -123,27 +123,6 @@ pedirTipo = do
         _   -> do
             putStrLn "Opcion invalida, seleccione de nuevo."
             pedirTipo
-
-pedirFecha :: IO Day
-pedirFecha = do
-    putStr "Anio (ej: 2025): "
-    hFlush stdout
-    anio <- readLn :: IO Integer
-    putStr "Mes (1-12): "
-    hFlush stdout
-    mes <- readLn :: IO Int
-    putStr "Dia (1-31): "
-    hFlush stdout
-    dia <- readLn :: IO Int
-    return $ fromGregorian anio mes dia
-
-splitOn :: Char -> String -> [String]
-splitOn _ "" = []
-splitOn delim str =
-    let (word, rest) = break (== delim) str
-    in word : case rest of
-        []     -> []
-        (_:xs) -> splitOn delim xs
 
 mostrarRegistros :: [RegistroFinanciero] -> IO ()
 mostrarRegistros [] = putStrLn "No hay registros."

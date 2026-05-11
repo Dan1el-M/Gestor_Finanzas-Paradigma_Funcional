@@ -150,3 +150,23 @@ mostrarCategoria :: Categoria -> IO ()
 mostrarCategoria categoria = do
     putStrLn ("ID: " ++ show (idCategoria categoria)
         ++ " | Nombre: " ++ nombreCategoria categoria)
+
+
+-- Muestra categorias y pide un ID valido
+pedirIdCategoria :: IO Int
+pedirIdCategoria = do
+    categorias <- cargarCategoriasMenu
+    mostrarTituloYCategorias categorias
+    putStr "ID de categoria: "
+    hFlush stdout
+    textoId <- getLine
+    case readMaybe textoId :: Maybe Int of
+        Nothing -> do
+            putStrLn "Debe ingresar un numero."
+            pedirIdCategoria
+        Just idCat ->
+            case Service.buscarCategoriaPorId idCat categorias of
+                Nothing -> do
+                    putStrLn "No existe una categoria con ese ID. Intente de nuevo."
+                    pedirIdCategoria
+                Just _ -> return idCat
