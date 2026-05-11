@@ -20,56 +20,65 @@ construirFecha anio mes dia
 
 pedirFecha :: IO Day
 pedirFecha = do
+    putStrLn ""
+    putStrLn "  ╔══════════════════════════╗"
+    putStrLn "  ║     Ingresar Fecha       ║"
+    putStrLn "  ╚══════════════════════════╝"
     anio <- pedirAnio
     mes  <- pedirMes
     dia  <- pedirDia anio mes
+    putStrLn $ "  ✓ Fecha seleccionada: " ++ show (fromGregorian anio mes dia)
     return $ fromGregorian anio mes dia
 
 pedirAnio :: IO Integer
 pedirAnio = do
-    putStr "Año (ej: 2025): "
+    putStr "  Año    » "
     hFlush stdout
     input <- getLine
     case readMaybe input :: Maybe Integer of
         Nothing -> do
-            putStrLn "Debe ingresar un numero."
+            putStrLn "  ✗ Debe ingresar un numero entero."
             pedirAnio
         Just anio ->
             if anio < 1900 || anio > 2100
                 then do
-                    putStrLn "Anio invalido. Debe ser entre 1900 y 2100."
+                    putStrLn "  ✗ Año invalido. Debe ser entre 1900 y 2100."
                     pedirAnio
                 else return anio
 
 pedirMes :: IO Int
 pedirMes = do
-    putStr "Mes (1-12): "
+    putStrLn ""
+    putStrLn "  Ene(1)  Feb(2)  Mar(3)  Abr(4)"
+    putStrLn "  May(5)  Jun(6)  Jul(7)  Ago(8)"
+    putStrLn "  Sep(9)  Oct(10) Nov(11) Dic(12)"
+    putStr "  Mes    » "
     hFlush stdout
     input <- getLine
     case readMaybe input :: Maybe Int of
         Nothing -> do
-            putStrLn "Debe ingresar un numero."
+            putStrLn "  ✗ Debe ingresar un numero."
             pedirMes
         Just mes ->
             if mes < 1 || mes > 12
                 then do
-                    putStrLn "Mes invalido. Debe ser entre 1 y 12."
+                    putStrLn "  ✗ Mes invalido. Debe ser entre 1 y 12."
                     pedirMes
                 else return mes
 
 pedirDia :: Integer -> Int -> IO Int
 pedirDia anio mes = do
     let maxDias = gregorianMonthLength anio mes
-    putStr $ "Dia (1-" ++ show maxDias ++ "): "
+    putStr $ "  Dia (1-" ++ show maxDias ++ ") » "
     hFlush stdout
     input <- getLine
     case readMaybe input :: Maybe Int of
         Nothing -> do
-            putStrLn "Debe ingresar un numero."
+            putStrLn "  ✗ Debe ingresar un numero."
             pedirDia anio mes
         Just dia ->
             if dia < 1 || dia > maxDias
                 then do
-                    putStrLn $ "Dia invalido. El mes tiene " ++ show maxDias ++ " dias."
+                    putStrLn $ "  ✗ Dia invalido. Este mes tiene " ++ show maxDias ++ " dias."
                     pedirDia anio mes
                 else return dia
