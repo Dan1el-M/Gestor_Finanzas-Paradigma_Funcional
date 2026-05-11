@@ -66,14 +66,15 @@ guardarCategorias categorias =
 cargarPresupuestos :: IO [Presupuesto]
 cargarPresupuestos = do
     lineas <- leerLineasArchivoSeguro rutaPresupuestos
-    let presupuestos = [p | Just p <- map lineaAPresupuesto lineas]
+    let lineasLimpias = map (filter (/= '\r')) lineas
+    let presupuestos = [p | Just p <- map lineaAPresupuesto lineasLimpias]
     return presupuestos
   where
     -- Convierte una línea del archivo a un Presupuesto; si falla el parseo retorna Nothing.
     lineaAPresupuesto :: String -> Maybe Presupuesto
     lineaAPresupuesto linea =
         case reads linea of
-            [(p, "")] -> Just p
+            [(p, resto)] | all (`elem` " \t") resto -> Just p
             _         -> Nothing
 
 -- Guarda la lista de presupuestos en presupuestos.txt usando Read/Show (1 presupuesto por línea).

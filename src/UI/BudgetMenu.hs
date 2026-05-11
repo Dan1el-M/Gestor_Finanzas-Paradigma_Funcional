@@ -12,55 +12,50 @@ import Services.BudgetService
     )
 import Services.FinanceRegistryService (cargarRegistros)
 import UI.CategoryMenu (pedirIdCategoria)
+import UI.UIHelpers (titulo, cerrar, enCaja, ok, err, padR, mostrarMonto)
 
--- Muestra el menú principal de presupuestos y ejecuta la opción seleccionada.
 menuPresupuestos :: IO ()
 menuPresupuestos = do
-    putStrLn "===================================="
-    putStrLn "        Gestion de Presupuestos"
-    putStrLn "===================================="
-    putStrLn ""
-    putStrLn "Seleccione una opcion:"
-    putStrLn "1. Definir presupuesto por categoria"
-    putStrLn "2. Comparar gasto real vs presupuesto"
-    putStrLn "3. Volver al menu principal"
-    putStr "Opcion: "
+    titulo "Gestion de Presupuestos"
+    enCaja "1. Definir presupuesto por categoria"
+    enCaja "2. Comparar gasto real vs presupuesto"
+    enCaja "3. Volver al menu principal"
+    cerrar
+    putStr "  Opcion: "
     hFlush stdout
     opcion <- getLine
     ejecutarOpcionPresupuesto opcion
 
--- Ejecuta una opción del menú de presupuestos.
 ejecutarOpcionPresupuesto :: String -> IO ()
 ejecutarOpcionPresupuesto opcion =
     case opcion of
         "1" -> subMenuDefinirPresupuesto >> menuPresupuestos
         "2" -> subMenuVerComparacionRealVsPresupuesto >> menuPresupuestos
-        "3" -> putStrLn "Volviendo al menu principal..."
-        _   -> putStrLn "Opcion invalida. Intente de nuevo." >> menuPresupuestos
+        "3" -> ok "Volviendo al menu principal..."
+        _   -> err "Opcion invalida." >> menuPresupuestos
 
--- Permite seleccionar una categoría y asignarle un monto de presupuesto (por defecto 0).
 subMenuDefinirPresupuesto :: IO ()
 subMenuDefinirPresupuesto = do
     categorias <- cargarCategorias
     presupuestos <- cargarPresupuestos
     let presupuestosCompletos = asegurarPresupuestosPorDefecto categorias presupuestos
 
-    putStrLn ""
-    putStrLn "Seleccione la categoria a presupuestar:"
+    titulo "Definir Presupuesto"
+    enCaja "Seleccione la categoria a presupuestar"
+    cerrar
     idCat <- pedirIdCategoria
 
-    putStr "Monto de presupuesto: "
+    putStr "  Monto de presupuesto: "
     hFlush stdout
     textoMonto <- getLine
 
     case readMaybe textoMonto :: Maybe Double of
-        Nothing -> putStrLn "Monto invalido. Debe ingresar un numero."
+        Nothing -> err "Monto invalido. Debe ingresar un numero."
         Just montoNuevo -> do
             let actualizados = asignarPresupuestoCategoria idCat montoNuevo presupuestosCompletos
             guardarPresupuestos actualizados
-            putStrLn "Presupuesto actualizado y guardado correctamente."
+            ok "Presupuesto actualizado y guardado correctamente."
 
--- Recorre registros y presupuestos y muestra la comparación de gasto real vs presupuesto por categoría.
 subMenuVerComparacionRealVsPresupuesto :: IO ()
 subMenuVerComparacionRealVsPresupuesto = do
     categorias <- cargarCategorias
@@ -68,21 +63,28 @@ subMenuVerComparacionRealVsPresupuesto = do
     registros <- cargarRegistros
     let presupuestosCompletos = asegurarPresupuestosPorDefecto categorias presupuestos
     let comparacion = compararRealVsPresupuesto categorias presupuestosCompletos registros
+    mostrarTablaComparacion comparacion
 
-    putStrLn ""
-    putStrLn "Categoria | Real (Gasto) | Presupuesto | Diferencia (Pres - Real)"
-    putStrLn "---------------------------------------------------------------"
-    mapM_ imprimirFila comparacion
+mostrarTablaComparacion :: [(Categoria, Double, Double, Double)] -> IO ()
+mostrarTablaComparacion filas = do
+    titulo "Comparacion Real vs Presupuesto"
+    enCaja encabezado
+    enCaja separador
+    mapM_ (enCaja . fila) filas
+    enCaja separador
+    cerrar
   where
-    -- Imprime una fila de comparación para una categoría.
-    imprimirFila :: (Categoria, Double, Double, Double) -> IO ()
-    imprimirFila (cat, real, presup, dif) =
-        putStrLn $
-            nombreCategoria cat
-                ++ " | "
-                ++ show real
-                ++ " | "
-                ++ show presup
-                ++ " | "
-                ++ show dif
+    encabezado =
+        padR 16 "Categoria"
+        ++ "| " ++ padR 10 "Real"
+        ++ "| " ++ padR 10 "Presup."
+        ++ "| " ++ padR 10 "Dif."
+
+    separador = replicate 48 '-'
+
+    fila (cat, real, presup, dif) =
+        padR 16 (nombreCategoria cat)
+        ++ "| " ++ padR 10 (mostrarMonto real)
+        ++ "| " ++ padR 10 (mostrarMonto presup)
+        ++ "| " ++ padR 10 (mostrarMonto dif)
 
