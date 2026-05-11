@@ -1,7 +1,6 @@
 module UI.FinanceRegistryMenu where
 
 import Data.Char (toLower)
-import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 
 import Models
@@ -12,28 +11,27 @@ import Services.RuleService (evaluarReglasAlRegistrar)
 import Services.DateService
 import UI.CategoryMenu (menuCategoria, pedirIdCategoria)
 import Utils (splitOn)
-import Text.Read (readMaybe)
-import UI.UIHelpers (titulo, cerrar, ok, err, padR)
-import Utils (splitOn)
+import UI.UIHelpers
+    ( cerrar, enCaja, err, menuOpciones, mostrarMonto, ok, opcion, padR
+    , prompt, promptOpcion, titulo
+    )
 
 menuRegistroFinanciero :: IO ()
 menuRegistroFinanciero = do
-    titulo "Registros Financieros"
-    putStrLn "  ║  1. Agregar registro                             ║"
-    putStrLn "  ║  2. Ver registros                                ║"
-    putStrLn "  ║  3. Editar registro                              ║"
-    putStrLn "  ║  4. Eliminar registro                            ║"
-    putStrLn "  ║  5. Gestionar categorias                         ║"
-    putStrLn "  ║  6. Volver al menu principal                     ║"
-    cerrar
-    putStr "  Opcion » "
-    hFlush stdout
-    opcion <- getLine
-    ejecutarOpcion opcion
+    menuOpciones "Registros Financieros"
+        [ opcion 1 "Agregar registro"
+        , opcion 2 "Ver registros"
+        , opcion 3 "Editar registro"
+        , opcion 4 "Eliminar registro"
+        , opcion 5 "Gestionar categorias"
+        , opcion 6 "Volver al menu principal"
+        ]
+    seleccion <- promptOpcion
+    ejecutarOpcion seleccion
 
 ejecutarOpcion :: String -> IO ()
-ejecutarOpcion opcion =
-    case opcion of
+ejecutarOpcion seleccion =
+    case seleccion of
         "1" -> subMenuAgregarRegistroFinanciero >> menuRegistroFinanciero
         "2" -> cargarRegistros >>= mostrarTablaRegistros >> menuRegistroFinanciero
         "3" -> subMenuEditarRegistroFinanciero >> menuRegistroFinanciero
@@ -71,7 +69,7 @@ subMenuAgregarRegistroFinanciero = do
                     reglas <- cargarReglas
                     mostrarAlertas (evaluarReglasAlRegistrar reglas existentes nuevo)
                 else
-                    putStrLn "Operacion cancelada. No se guardo el registro."
+                    err "Operacion cancelada. No se guardo el registro."
 
 mostrarAlertas :: [Alerta] -> IO ()
 mostrarAlertas [] = return ()
@@ -88,9 +86,7 @@ mostrarAlerta alerta =
 confirmarExcesoPresupuesto :: IO Bool
 confirmarExcesoPresupuesto = do
     err "ADVERTENCIA: este gasto excede el presupuesto de la categoria."
-    putStr "  Desea continuar de todos modos? (s/n): "
-    hFlush stdout
-    resp <- getLine
+    resp <- prompt "Desea continuar de todos modos? (s/n)"
     let respNorm = map toLower resp
     return (respNorm == "s" || respNorm == "si" || respNorm == "sí")
 
@@ -116,9 +112,7 @@ solicitarDatosRegistro existentes idNuevo = do
         then return Nothing
         else do
             fecha <- pedirFecha
-            putStr "  Descripcion     » "
-            hFlush stdout
-            desc <- getLine
+            desc <- prompt "Descripcion"
             etiquetas <- pedirEtiquetas
 
             return $ Just RegistroFinanciero
@@ -133,9 +127,7 @@ solicitarDatosRegistro existentes idNuevo = do
 
 pedirMonto :: IO Double
 pedirMonto = do
-    putStr "  Monto           » "
-    hFlush stdout
-    input <- getLine
+    input <- prompt "Monto"
     case readMaybe input :: Maybe Double of
         Nothing -> err "Debe ingresar un numero." >> pedirMonto
         Just m | m <= 0 -> err "El monto debe ser mayor a 0." >> pedirMonto
@@ -143,13 +135,13 @@ pedirMonto = do
 
 pedirTipo :: IO TipoRegistro
 pedirTipo = do
-    putStrLn ""
-    putStrLn "  Tipo de registro:"
-    putStrLn "    1. Ingreso    2. Gasto"
-    putStrLn "    3. Ahorro     4. Inversion"
-    putStr "  Opcion » "
-    hFlush stdout
-    op <- getLine
+    menuOpciones "Tipo de Registro"
+        [ opcion 1 "Ingreso"
+        , opcion 2 "Gasto"
+        , opcion 3 "Ahorro"
+        , opcion 4 "Inversion"
+        ]
+    op <- promptOpcion
     case op of
         "1" -> return Ingreso
         "2" -> return Gasto
@@ -159,9 +151,7 @@ pedirTipo = do
 
 pedirEtiquetas :: IO [String]
 pedirEtiquetas = do
-    putStr "  Etiquetas (fijo,variable) » "
-    hFlush stdout
-    input <- getLine
+    input <- prompt "Etiquetas (fijo,variable)"
     let etiquetas = filter (not . null) (splitOn ',' input)
     if null etiquetas
         then err "Debe ingresar al menos una etiqueta." >> pedirEtiquetas
@@ -176,7 +166,7 @@ siguienteIdRegistro rs = maximum (map idRegistro rs) + 1
 mostrarTablaRegistros :: [RegistroFinanciero] -> IO ()
 mostrarTablaRegistros [] = do
     titulo "Registros Financieros"
-    putStrLn "  ║  No hay registros registrados.                   ║"
+    enCaja "No hay registros registrados."
     cerrar
 mostrarTablaRegistros rs = do
     titulo "Registros Financieros"
@@ -202,7 +192,7 @@ filaConNumero categorias n r =
     padR 5 (show n)
     ++ "│ " ++ padR 6  (show (idRegistro r))
     ++ "│ " ++ padR 11 (show (tipoRegistro r))
-    ++ "│ " ++ padR 10 (show (montoRegistro r))
+    ++ "│ " ++ padR 10 (mostrarMonto (montoRegistro r))
     ++ "│ " ++ padR 12 (show (fechaRegistro r))
     ++ "│ " ++ padR 15 (descripcionRegistro r)
     ++ "| " ++ padR 20 nombreCat
@@ -222,9 +212,8 @@ subMenuEditarRegistroFinanciero = do
         then err "No hay registros para editar."
         else do
             mostrarTablaRegistros registros
-            putStr "\n  Numero de la tabla a editar » "
-            hFlush stdout
-            input <- getLine
+            putStrLn ""
+            input <- prompt "Numero de la tabla a editar"
             case readMaybe input :: Maybe Int of
                 Nothing -> err "Debe ingresar un numero."
                 Just n ->
@@ -253,9 +242,8 @@ subMenuEliminarRegistroFinanciero = do
         then err "No hay registros para eliminar."
         else do
             mostrarTablaRegistros registros
-            putStr "\n  Numero de la tabla a eliminar » "
-            hFlush stdout
-            input <- getLine
+            putStrLn ""
+            input <- prompt "Numero de la tabla a eliminar"
             case readMaybe input :: Maybe Int of
                 Nothing -> err "Debe ingresar un numero."
                 Just n ->

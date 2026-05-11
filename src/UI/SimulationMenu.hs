@@ -1,174 +1,157 @@
 module UI.SimulationMenu where
 
-import System.IO (hFlush, stdout)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
 
 import Services.FinanceRegistryService (cargarRegistros)
 import qualified Services.SimulationService as Service
 import UI.CategoryMenu (pedirIdCategoria)
+import UI.UIHelpers
+    ( cerrar, enCaja, err, menuOpciones, mostrarMonto, ok, opcion, prompt
+    , promptOpcion, titulo
+    )
 
 menuSimulacion :: IO ()
 menuSimulacion = do
-    putStrLn ""
-    putStrLn "===== Simulacion financiera ====="
-    putStrLn "1. Simular reduccion de gastos"
-    putStrLn "2. Proyectar ahorro en el tiempo"
-    putStrLn "3. Volver al menu principal"
-    putStr "Opcion: "
-    hFlush stdout
-
-    opcion <- getLine
-    case opcion of
+    menuOpciones "Simulacion Financiera"
+        [ opcion 1 "Simular reduccion de gastos"
+        , opcion 2 "Proyectar ahorro en el tiempo"
+        , opcion 3 "Volver al menu principal"
+        ]
+    seleccion <- promptOpcion
+    case seleccion of
         "1" -> simularReduccionMenu >> menuSimulacion
         "2" -> proyectarAhorroMenu >> menuSimulacion
-        "3" -> putStrLn "Volviendo al menu principal..."
-        _ -> do
-            putStrLn "Opcion invalida. Intente de nuevo."
-            menuSimulacion
+        "3" -> ok "Volviendo al menu principal..."
+        _ -> err "Opcion invalida. Intente de nuevo." >> menuSimulacion
 
 simularReduccionMenu :: IO ()
 simularReduccionMenu = do
-    putStrLn ""
-    putStrLn "===== Simular reduccion de gastos ====="
-    putStrLn "1. Aplicar a todos los gastos"
-    putStrLn "2. Aplicar a gastos de una categoria"
-    putStrLn "3. Volver al menu de simulacion"
-    putStr "Opcion: "
-    hFlush stdout
-    opcion <- getLine
+    menuOpciones "Simular Reduccion de Gastos"
+        [ opcion 1 "Aplicar a todos los gastos"
+        , opcion 2 "Aplicar a gastos de una categoria"
+        , opcion 3 "Volver al menu de simulacion"
+        ]
+    seleccion <- promptOpcion
 
-    case opcion of
+    case seleccion of
         "1" -> simularReduccionTodosLosGastos
         "2" -> simularReduccionPorCategoria
-        "3" -> putStrLn "Volviendo al menu de simulacion..."
-        _ -> putStrLn "Opcion invalida. Regresando al menu de simulacion."
+        "3" -> ok "Volviendo al menu de simulacion..."
+        _ -> err "Opcion invalida. Regresando al menu de simulacion."
 
 simularReduccionTodosLosGastos :: IO ()
 simularReduccionTodosLosGastos = do
-    putStr "Porcentaje de reduccion: "
-    hFlush stdout
-    textoPorcentaje <- getLine
+    textoPorcentaje <- prompt "Porcentaje de reduccion"
 
     case readMaybe textoPorcentaje :: Maybe Double of
         Nothing ->
-            putStrLn "Porcentaje invalido. Debe ingresar un numero positivo."
+            err "Porcentaje invalido. Debe ingresar un numero positivo."
 
         Just porcentaje -> do
             registros <- cargarRegistros
             case Service.simularReduccionGastos porcentaje registros of
                 Left mensaje ->
-                    putStrLn mensaje
+                    err mensaje
 
                 Right resultado -> do
-                    putStrLn ""
-                    putStrLn "Resultado de la simulacion:"
-                    putStrLn $ "Gastos actuales: " ++ formatoMonto (Service.gastoActualReduccion resultado)
-                    putStrLn $ "Porcentaje de reduccion: " ++ formatoPorcentaje (Service.porcentajeReduccion resultado)
-                    putStrLn $ "Nuevo gasto estimado: " ++ formatoMonto (Service.nuevoGastoEstimado resultado)
-                    putStrLn $ "Ahorro generado por la reduccion: " ++ formatoMonto (Service.ahorroGeneradoReduccion resultado)
-                    putStrLn "Esta simulacion no modifica los registros guardados."
+                    titulo "Resultado de la Simulacion"
+                    enCaja $ "Gastos actuales: " ++ mostrarMonto (Service.gastoActualReduccion resultado)
+                    enCaja $ "Porcentaje de reduccion: " ++ formatoPorcentaje (Service.porcentajeReduccion resultado)
+                    enCaja $ "Nuevo gasto estimado: " ++ mostrarMonto (Service.nuevoGastoEstimado resultado)
+                    enCaja $ "Ahorro generado: " ++ mostrarMonto (Service.ahorroGeneradoReduccion resultado)
+                    enCaja "Esta simulacion no modifica los registros guardados."
+                    cerrar
 
 simularReduccionPorCategoria :: IO ()
 simularReduccionPorCategoria = do
-    putStrLn ""
-    putStrLn "Seleccione la categoria de gastos a simular:"
+    titulo "Categoria a Simular"
+    cerrar
     idCategoria <- pedirIdCategoria
-    putStr "Porcentaje de reduccion: "
-    hFlush stdout
-    textoPorcentaje <- getLine
+    textoPorcentaje <- prompt "Porcentaje de reduccion"
 
     case readMaybe textoPorcentaje :: Maybe Double of
         Nothing ->
-            putStrLn "Porcentaje invalido. Debe ingresar un numero positivo."
+            err "Porcentaje invalido. Debe ingresar un numero positivo."
 
         Just porcentaje -> do
             registros <- cargarRegistros
             case Service.simularReduccionGastosPorCategoria idCategoria porcentaje registros of
                 Left mensaje ->
-                    putStrLn mensaje
+                    err mensaje
 
                 Right resultado -> do
-                    putStrLn ""
-                    putStrLn "Resultado de la simulacion por categoria:"
-                    putStrLn $ "ID de categoria: " ++ show idCategoria
-                    putStrLn $ "Gastos actuales de la categoria: " ++ formatoMonto (Service.gastoActualReduccion resultado)
-                    putStrLn $ "Porcentaje de reduccion: " ++ formatoPorcentaje (Service.porcentajeReduccion resultado)
-                    putStrLn $ "Nuevo gasto estimado de la categoria: " ++ formatoMonto (Service.nuevoGastoEstimado resultado)
-                    putStrLn $ "Ahorro generado por la reduccion: " ++ formatoMonto (Service.ahorroGeneradoReduccion resultado)
-                    putStrLn "Esta simulacion no modifica los registros guardados."
+                    titulo "Resultado por Categoria"
+                    enCaja $ "ID de categoria: " ++ show idCategoria
+                    enCaja $ "Gastos actuales: " ++ mostrarMonto (Service.gastoActualReduccion resultado)
+                    enCaja $ "Porcentaje de reduccion: " ++ formatoPorcentaje (Service.porcentajeReduccion resultado)
+                    enCaja $ "Nuevo gasto estimado: " ++ mostrarMonto (Service.nuevoGastoEstimado resultado)
+                    enCaja $ "Ahorro generado: " ++ mostrarMonto (Service.ahorroGeneradoReduccion resultado)
+                    enCaja "Esta simulacion no modifica los registros guardados."
+                    cerrar
 
 proyectarAhorroMenu :: IO ()
 proyectarAhorroMenu = do
-    putStrLn ""
-    putStrLn "===== Proyectar ahorro en el tiempo ====="
-    putStrLn "1. Proyectar con todos los ahorros"
-    putStrLn "2. Proyectar con ahorros de una categoria"
-    putStrLn "3. Volver al menu de simulacion"
-    putStr "Opcion: "
-    hFlush stdout
-    opcion <- getLine
+    menuOpciones "Proyectar Ahorro"
+        [ opcion 1 "Proyectar con todos los ahorros"
+        , opcion 2 "Proyectar con ahorros de una categoria"
+        , opcion 3 "Volver al menu de simulacion"
+        ]
+    seleccion <- promptOpcion
 
-    case opcion of
+    case seleccion of
         "1" -> proyectarAhorroGeneral
         "2" -> proyectarAhorroPorCategoria
-        "3" -> putStrLn "Volviendo al menu de simulacion..."
-        _ -> putStrLn "Opcion invalida. Regresando al menu de simulacion."
+        "3" -> ok "Volviendo al menu de simulacion..."
+        _ -> err "Opcion invalida. Regresando al menu de simulacion."
 
 proyectarAhorroGeneral :: IO ()
 proyectarAhorroGeneral = do
-    putStr "Cantidad de meses: "
-    hFlush stdout
-    textoMeses <- getLine
+    textoMeses <- prompt "Cantidad de meses"
 
     case readMaybe textoMeses :: Maybe Int of
         Nothing ->
-            putStrLn "Cantidad de meses invalida. Debe ingresar un numero positivo."
+            err "Cantidad de meses invalida. Debe ingresar un numero positivo."
 
         Just cantidadMeses -> do
             registros <- cargarRegistros
             case Service.proyectarAhorroDesdePromedio cantidadMeses registros of
                 Left mensaje ->
-                    putStrLn mensaje
+                    err mensaje
 
                 Right resultado -> do
-                    putStrLn ""
-                    putStrLn "Resultado de la proyeccion general:"
-                    putStrLn $ "Promedio de ahorros registrados: " ++ formatoMonto (Service.promedioAhorro resultado)
-                    putStrLn $ "Cantidad de meses: " ++ show (Service.mesesProyeccion resultado)
-                    putStrLn $ "Ahorro proyectado: " ++ formatoMonto (Service.ahorroProyectado resultado)
-                    putStrLn "Esta proyeccion no modifica los registros guardados."
+                    titulo "Resultado de la Proyeccion"
+                    enCaja $ "Promedio de ahorros: " ++ mostrarMonto (Service.promedioAhorro resultado)
+                    enCaja $ "Cantidad de meses: " ++ show (Service.mesesProyeccion resultado)
+                    enCaja $ "Ahorro proyectado: " ++ mostrarMonto (Service.ahorroProyectado resultado)
+                    enCaja "Esta proyeccion no modifica los registros guardados."
+                    cerrar
 
 proyectarAhorroPorCategoria :: IO ()
 proyectarAhorroPorCategoria = do
-    putStrLn ""
-    putStrLn "Seleccione la categoria de ahorros a proyectar:"
+    titulo "Categoria a Proyectar"
+    cerrar
     idCategoria <- pedirIdCategoria
-    putStr "Cantidad de meses: "
-    hFlush stdout
-    textoMeses <- getLine
+    textoMeses <- prompt "Cantidad de meses"
 
     case readMaybe textoMeses :: Maybe Int of
         Nothing ->
-            putStrLn "Cantidad de meses invalida. Debe ingresar un numero positivo."
+            err "Cantidad de meses invalida. Debe ingresar un numero positivo."
 
         Just cantidadMeses -> do
             registros <- cargarRegistros
             case Service.proyectarAhorroDesdePromedioPorCategoria idCategoria cantidadMeses registros of
                 Left mensaje ->
-                    putStrLn mensaje
+                    err mensaje
 
                 Right resultado -> do
-                    putStrLn ""
-                    putStrLn "Resultado de la proyeccion por categoria:"
-                    putStrLn $ "ID de categoria: " ++ show idCategoria
-                    putStrLn $ "Promedio de ahorros de la categoria: " ++ formatoMonto (Service.promedioAhorro resultado)
-                    putStrLn $ "Cantidad de meses: " ++ show (Service.mesesProyeccion resultado)
-                    putStrLn $ "Ahorro proyectado: " ++ formatoMonto (Service.ahorroProyectado resultado)
-                    putStrLn "Esta proyeccion no modifica los registros guardados."
-
-formatoMonto :: Double -> String
-formatoMonto monto = printf "CRC %.2f" monto
+                    titulo "Resultado por Categoria"
+                    enCaja $ "ID de categoria: " ++ show idCategoria
+                    enCaja $ "Promedio de ahorros: " ++ mostrarMonto (Service.promedioAhorro resultado)
+                    enCaja $ "Cantidad de meses: " ++ show (Service.mesesProyeccion resultado)
+                    enCaja $ "Ahorro proyectado: " ++ mostrarMonto (Service.ahorroProyectado resultado)
+                    enCaja "Esta proyeccion no modifica los registros guardados."
+                    cerrar
 
 formatoPorcentaje :: Double -> String
 formatoPorcentaje porcentaje = printf "%.2f%%" porcentaje

@@ -1,27 +1,27 @@
 module UI.ReportMenu where
 
-import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 import Models
 import Services.ReportService
 import Services.FinanceRegistryService (cargarRegistros,filtrarPorMes)
 import Services.DateService (pedirAnio, pedirMes)
 import FileManager (cargarCategorias)
-import UI.UIHelpers (titulo, cerrar, ok, err, padR, mostrarMonto)
+import UI.UIHelpers
+    ( cerrar, err, menuOpciones, mostrarMonto, ok, opcion, padR
+    , prompt, promptOpcion, separador, titulo
+    )
 import UI.FinanceRegistryMenu (mostrarTablaRegistros)
 
 menuReportes :: IO ()
 menuReportes = do
-    titulo "Reportes Financieros"
-    putStrLn "  ║  1. Resumen mensual                              ║"
-    putStrLn "  ║  2. Comparar dos periodos                        ║"
-    putStrLn "  ║  3. Categorias con mayor gasto                   ║"
-    putStrLn "  ║  4. Volver                                       ║"
-    cerrar
-    putStr "  Opcion » "
-    hFlush stdout
-    opcion <- getLine
-    case opcion of
+    menuOpciones "Reportes Financieros"
+        [ opcion 1 "Resumen mensual"
+        , opcion 2 "Comparar dos periodos"
+        , opcion 3 "Categorias con mayor gasto"
+        , opcion 4 "Volver"
+        ]
+    seleccion <- promptOpcion
+    case seleccion of
         "1" -> menuResumenMensual    >> menuReportes
         "2" -> menuCompararPeriodos  >> menuReportes
         "3" -> menuTopCategorias     >> menuReportes
@@ -47,12 +47,12 @@ mostrarResumen r = do
     let (anio, mes) = periodoResumen r
     putStrLn ""
     putStrLn $ "  Periodo       : " ++ show anio ++ "/" ++ show mes
-    putStrLn $ "  ─────────────────────────────────────"
+    separador
     putStrLn $ "  Ingresos      : " ++ mostrarMonto (totalIngresos r)
     putStrLn $ "  Gastos        : " ++ mostrarMonto (totalGastos r)
     putStrLn $ "  Ahorros       : " ++ mostrarMonto (totalAhorros r)
     putStrLn $ "  Inversiones   : " ++ mostrarMonto (totalInversiones r)
-    putStrLn $ "  ─────────────────────────────────────"
+    separador
     putStrLn $ "  Balance       : " ++ mostrarMonto (balanceMensual r)
     putStrLn $ "  Registros     : " ++ show (cantidadRegistros r)
 
@@ -136,9 +136,7 @@ menuTopCategorias :: IO ()
 menuTopCategorias = do
     titulo "Categorias con Mayor Gasto"
     cerrar
-    putStr "  Cuantas categorias mostrar (ej: 5) » "
-    hFlush stdout
-    input <- getLine
+    input <- prompt "Cuantas categorias mostrar (ej: 5)"
     case readMaybe input :: Maybe Int of
         Nothing -> err "Debe ingresar un numero."
         Just n -> do
@@ -165,4 +163,4 @@ mostrarTopCategorias top cats = do
         in putStrLn $ "  " ++ padR 5 (show pos)
                     ++ padR 6 (show (idCatGasto g))
                     ++ padR 20 nombre
-                    ++ padR 14 (show (totalGastado g))  -- ← show directo, sin simbolo
+                    ++ padR 14 (mostrarMonto (totalGastado g))

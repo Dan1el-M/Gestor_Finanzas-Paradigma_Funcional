@@ -1,6 +1,5 @@
 module UI.BudgetMenu where
 
-import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 
 import FileManager (cargarCategorias, cargarPresupuestos, guardarPresupuestos)
@@ -12,23 +11,24 @@ import Services.BudgetService
     )
 import Services.FinanceRegistryService (cargarRegistros)
 import UI.CategoryMenu (pedirIdCategoria)
-import UI.UIHelpers (titulo, cerrar, enCaja, ok, err, padR, mostrarMonto)
+import UI.UIHelpers
+    ( cerrar, enCaja, err, menuOpciones, mostrarMonto, ok, opcion, padR
+    , prompt, promptOpcion, titulo
+    )
 
 menuPresupuestos :: IO ()
 menuPresupuestos = do
-    titulo "Gestion de Presupuestos"
-    enCaja "1. Definir presupuesto por categoria"
-    enCaja "2. Comparar gasto real vs presupuesto"
-    enCaja "3. Volver al menu principal"
-    cerrar
-    putStr "  Opcion: "
-    hFlush stdout
-    opcion <- getLine
-    ejecutarOpcionPresupuesto opcion
+    menuOpciones "Gestion de Presupuestos"
+        [ opcion 1 "Definir presupuesto por categoria"
+        , opcion 2 "Comparar gasto real vs presupuesto"
+        , opcion 3 "Volver al menu principal"
+        ]
+    seleccion <- promptOpcion
+    ejecutarOpcionPresupuesto seleccion
 
 ejecutarOpcionPresupuesto :: String -> IO ()
-ejecutarOpcionPresupuesto opcion =
-    case opcion of
+ejecutarOpcionPresupuesto seleccion =
+    case seleccion of
         "1" -> subMenuDefinirPresupuesto >> menuPresupuestos
         "2" -> subMenuVerComparacionRealVsPresupuesto >> menuPresupuestos
         "3" -> ok "Volviendo al menu principal..."
@@ -45,9 +45,7 @@ subMenuDefinirPresupuesto = do
     cerrar
     idCat <- pedirIdCategoria
 
-    putStr "  Monto de presupuesto: "
-    hFlush stdout
-    textoMonto <- getLine
+    textoMonto <- prompt "Monto de presupuesto"
 
     case readMaybe textoMonto :: Maybe Double of
         Nothing -> err "Monto invalido. Debe ingresar un numero."
@@ -68,23 +66,25 @@ subMenuVerComparacionRealVsPresupuesto = do
 mostrarTablaComparacion :: [(Categoria, Double, Double, Double)] -> IO ()
 mostrarTablaComparacion filas = do
     titulo "Comparacion Real vs Presupuesto"
-    enCaja encabezado
-    enCaja separador
-    mapM_ (enCaja . fila) filas
-    enCaja separador
     cerrar
+    putStrLn $ "  " ++ encabezado
+    putStrLn $ "  " ++ separador
+    mapM_ (putStrLn . ("  " ++) . fila) filas
+    putStrLn $ "  " ++ separador
   where
     encabezado =
-        padR 16 "Categoria"
-        ++ "| " ++ padR 10 "Real"
-        ++ "| " ++ padR 10 "Presup."
-        ++ "| " ++ padR 10 "Dif."
+        padR 24 "Categoria"
+        ++ "│ " ++ padR 14 "Real"
+        ++ "│ " ++ padR 14 "Presup."
+        ++ "│ " ++ padR 14 "Dif."
 
-    separador = replicate 48 '-'
+    separador = replicate (length encabezado) '─'
 
     fila (cat, real, presup, dif) =
-        padR 16 (nombreCategoria cat)
-        ++ "| " ++ padR 10 (mostrarMonto real)
-        ++ "| " ++ padR 10 (mostrarMonto presup)
-        ++ "| " ++ padR 10 (mostrarMonto dif)
+        padR 24 (limpiarNombre (nombreCategoria cat))
+        ++ "│ " ++ padR 14 (mostrarMonto real)
+        ++ "│ " ++ padR 14 (mostrarMonto presup)
+        ++ "│ " ++ padR 14 (mostrarMonto dif)
+
+    limpiarNombre = filter (/= '\r')
 

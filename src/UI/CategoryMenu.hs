@@ -1,27 +1,24 @@
 module UI.CategoryMenu where
 
-import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
 import FileManager (cargarCategorias)
 import qualified Services.CategoryService as Service
 import Services.FinanceRegistryService (cargarRegistros)
 import Models
-import UI.UIHelpers (titulo, cerrar, ok, err)
+import UI.UIHelpers (cerrar, err, menuOpciones, ok, opcion, prompt, promptOpcion, titulo)
 
 menuCategoria :: IO ()
 menuCategoria = do
-    titulo "Gestion de Categorias"
-    putStrLn "  ║  1. Crear categoria                              ║"
-    putStrLn "  ║  2. Listar categorias                            ║"
-    putStrLn "  ║  3. Buscar categoria por ID                      ║"
-    putStrLn "  ║  4. Actualizar categoria                         ║"
-    putStrLn "  ║  5. Eliminar categoria                           ║"
-    putStrLn "  ║  6. Volver                                       ║"
-    cerrar
-    putStr "  Opcion » "
-    hFlush stdout
-    opcion <- getLine
-    case opcion of
+    menuOpciones "Gestion de Categorias"
+        [ opcion 1 "Crear categoria"
+        , opcion 2 "Listar categorias"
+        , opcion 3 "Buscar categoria por ID"
+        , opcion 4 "Actualizar categoria"
+        , opcion 5 "Eliminar categoria"
+        , opcion 6 "Volver"
+        ]
+    seleccion <- promptOpcion
+    case seleccion of
         "1" -> crearCategoriaMenu    >> menuCategoria
         "2" -> listarCategoriasMenu  >> menuCategoria
         "3" -> buscarCategoriaMenu   >> menuCategoria
@@ -40,9 +37,7 @@ crearCategoriaMenu :: IO ()
 crearCategoriaMenu = do
     titulo "Crear Categoria"
     cerrar
-    putStr "  Nombre » "
-    hFlush stdout
-    nombre <- getLine
+    nombre <- prompt "Nombre"
     categorias <- cargarCategoriasMenu
     resultado <- Service.crearCategoriaService nombre categorias
     case resultado of
@@ -62,9 +57,7 @@ buscarCategoriaMenu = do
     cerrar
     categorias <- cargarCategoriasMenu
     mostrarCategorias categorias
-    putStr "  ID » "
-    hFlush stdout
-    textoId <- getLine
+    textoId <- prompt "ID"
     case readMaybe textoId :: Maybe Int of
         Nothing -> err "Debe ingresar un numero."
         Just idBuscado ->
@@ -78,15 +71,11 @@ actualizarCategoriaMenu = do
     cerrar
     categorias <- cargarCategoriasMenu
     mostrarCategorias categorias
-    putStr "  ID a actualizar » "
-    hFlush stdout
-    textoId <- getLine
+    textoId <- prompt "ID a actualizar"
     case readMaybe textoId :: Maybe Int of
         Nothing -> err "Debe ingresar un numero."
         Just idBuscado -> do
-            putStr "  Nuevo nombre » "
-            hFlush stdout
-            nuevoNombre <- getLine
+            nuevoNombre <- prompt "Nuevo nombre"
             resultado <- Service.actualizarCategoriaService idBuscado nuevoNombre categorias
             case resultado of
                 Left mensaje -> err mensaje
@@ -98,9 +87,7 @@ eliminarCategoriaMenu = do
     cerrar
     categorias <- cargarCategoriasMenu
     mostrarCategorias categorias
-    putStr "  ID a eliminar » "
-    hFlush stdout
-    textoId <- getLine
+    textoId <- prompt "ID a eliminar"
     case readMaybe textoId :: Maybe Int of
         Nothing -> err "Debe ingresar un numero."
         Just idBuscado -> do
@@ -125,9 +112,7 @@ pedirIdCategoria = do
     titulo "Seleccionar Categoria"
     cerrar
     mostrarCategorias categorias
-    putStr "  ID de categoria » "
-    hFlush stdout
-    textoId <- getLine
+    textoId <- prompt "ID de categoria"
     case readMaybe textoId :: Maybe Int of
         Nothing -> err "Debe ingresar un numero." >> pedirIdCategoria
         Just idCat ->
